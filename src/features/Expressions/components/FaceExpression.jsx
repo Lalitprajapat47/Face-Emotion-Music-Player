@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   FaceLandmarker,
   FilesetResolver,
@@ -6,36 +6,131 @@ import {
 
 export default function FaceExpression() {
   const videoRef = useRef(null);
-  const faceLandmarkerRef = useRef(null);
+  const landmarkerRef = useRef(null);
+  const animationRef = useRef(null);
+
+  const [expression, setExpression] = useState("Detecting...");
 
   useEffect(() => {
-    async function init() {
-      const vision = await FilesetResolver.forVisionTasks(
-        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
-      );
+    let stream;
 
-      faceLandmarkerRef.current =
-        await FaceLandmarker.createFromOptions(vision, {
-          baseOptions: {
-            modelAssetPath:
-              "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task",
-          },
-          outputFaceBlendshapes: true,
-          runningMode: "VIDEO",
-          numFaces: 1,
+    const init = async () => {
+      try {
+        // Load MediaPipe WASM
+        const vision = await FilesetResolver.forVisionTasks(
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
+        );
+
+        // Load Face Landmarker Model
+        landmarkerRef.current = await FaceLandmarker.createFromOptions(
+          vision,
+          {
+            baseOptions: {
+              modelAssetPath:
+                "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task",
+            },
+            outputFaceBlendshapes: true,
+            runningMode: "VIDEO",
+            numFaces: 1,
+          }
+        );
+
+        // Start Camera
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
         });
 
-      startCamera();
-    }
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          await videoRef.current.play();
+        }
+
+        detect();
+      } catch (error) {
+        console.error("Initialization Error:", error);
+      }
+    };
+
+    const detect = () => {
+      if (
+        !landmarkerRef.current ||
+        !videoRef.current ||
+        videoRef.current.readyState < 2
+      ) {
+        animationRef.current = requestAnimationFrame(detect);
+        return;
+      }
+
+      const results = landmarkerRef.current.detectForVideo(
+        videoRef.current,
+        performance.now()
+      );
+
+      if (results.faceBlendshapes?.length > 0) {
+        const blendshapes = results.faceBlendshapes[0].categories;
+
+        const getScore = (name) =>
+          blendshapes.find((b) => b.categoryName === name)?.score || 0;
+
+        const smileLeft = getScore("mouthSmileLeft");
+        const smileRight = getScore("mouthSmileRight");
+
+        const jawOpen = getScore("jawOpen");
+        const browUp = getScore("browInnerUp");
+
+        const frownLeft = getScore("mouthFrownLeft");
+        const frownRight = getScore("mouthFrownRight");
+
+        let currentExpression = "😐 Neutral";
+
+        if (smileLeft > 0.5 && smileRight > 0.5) {
+          currentExpression = "😄 Happy";
+        } else if (jawOpen > 0.6 && browUp > 0.5) {
+          currentExpression = "😲 Surprised";
+        } else if (frownLeft > 0.5 && frownRight > 0.5) {
+          currentExpression = "😢 Sad";
+        }
+
+        setExpression(currentExpression);
+      } else {
+        setExpression("No Face Detected");
+      }
+
+      animationRef.current = requestAnimationFrame(detect);
+    };
 
     init();
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+
+      if (landmarkerRef.current) {
+        landmarkerRef.current.close();
+      }
+
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+    };
   }, []);
 
   return (
-    <video
-      ref={videoRef}
-      autoPlay
-      playsInline
-    />
+    <div style={{ textAlign: "center", padding: "20px" }}>
+      <video
+        ref={videoRef}
+        autoPlay
+        muted
+        playsInline
+        style={{
+          width: "450px",
+          borderRadius: "12px",
+          border: "2px solid #ccc",
+        }}
+      />
+
+      <h2>{expression}</h2>
+    </div>
   );
 }
