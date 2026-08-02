@@ -1,31 +1,32 @@
 import { useEffect, useRef, useState } from "react";
+import { init } from "../utils/utils";
 
 export default function FaceExpression() {
     const videoRef = useRef(null);
     const landmarkerRef = useRef(null);
-    const animationRef = useRef(null);
-    let stream;
+    const streamRef = useRef(null);
 
     const [expression, setExpression] = useState("Detecting...");
-    
+
     useEffect(() => {
-        let stream;
-
-
-
-        init();
+        init({
+            videoRef,
+            landmarkerRef,
+            streamRef,
+            animationRef,
+            setExpression,
+        });
 
         return () => {
-            if (animationRef.current) {
-                cancelAnimationFrame(animationRef.current);
-            }
 
             if (landmarkerRef.current) {
                 landmarkerRef.current.close();
             }
 
-            if (stream) {
-                stream.getTracks().forEach((track) => track.stop());
+            if (streamRef.current) {
+                streamRef.current
+                    .getTracks()
+                    .forEach((track) => track.stop());
             }
         };
     }, []);
@@ -45,7 +46,6 @@ export default function FaceExpression() {
             />
 
             <h2>{expression}</h2>
-            <button onClick={detect} >Detect Expression</button>
         </div>
     );
 }
