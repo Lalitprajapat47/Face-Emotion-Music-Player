@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
 
 
+
 async function registerUser(req, res) {
     const { username, email, password } = req.body
     const isAlreadyRegistered = await userModel.findOne({
@@ -77,7 +78,13 @@ async function loginUser(req, res) {
     )
 }
 
+async function getMe(req, res) {
+    const user = await userModel.findById(req.user.id)
+    return res.status(200).json({ user })
+}
+
 module.exports = {
     registerUser,
-    loginUser
+    loginUser,
+    getMe
 }
