@@ -9,6 +9,6 @@ router.post('/login', authController.loginUser)
 
 router.get('/get-me', authMiddleware, authController.getMe)
 
-router.get('/logout', authMiddleware, authController.logoutUser)
+router.get('/logout', authController.logoutUser)
 
 module.exports = router;
