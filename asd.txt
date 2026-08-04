@@ -1,0 +1,2 @@
+host: 'waxy-throat-prose-89124.db.redis.io',
+port: 12049
