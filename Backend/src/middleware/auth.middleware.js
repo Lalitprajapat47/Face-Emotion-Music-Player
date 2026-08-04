@@ -1,5 +1,6 @@
 const useModel = require('../models/user.model')
 const jwt = require('jsonwebtoken')
+const redis = require('../config/cache')
 
 
 async function authUser(req, res, next) {
