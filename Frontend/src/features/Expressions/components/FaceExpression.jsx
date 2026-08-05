@@ -13,7 +13,6 @@ export default function FaceExpression() {
             videoRef,
             landmarkerRef,
             streamRef,
-            animationRef,
             setExpression,
         });
 
