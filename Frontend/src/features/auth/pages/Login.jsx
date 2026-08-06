@@ -1,10 +1,18 @@
 import React from 'react'
 import { Link } from 'react-router'
 import '../style/login.scss'
+import { useAuth } from '../hooks/useAuth'
 
 const Login = () => {
 
-  
+  const { loading, handleLogin } = useAuth()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+
+  async function handleSubmit(e) {
+    e.preventDefault()
+    await handleLogin({ email, password })
+  }
 
   return (
     <main className="auth-page login-page">
@@ -16,12 +24,13 @@ const Login = () => {
             <p>Analyze facial expressions and keep your mood insights moving forward.</p>
           </div>
 
-          <form className="auth-form">
+          <form className="auth-form" onSubmit={handleSubmit}>
             <label htmlFor="email">Email address</label>
-            <input type="email" id="email" placeholder="you@example.com" />
+            <input
+              type="email" id="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
 
             <label htmlFor="password">Password</label>
-            <input type="password" id="password" placeholder="Enter your password" />
+            <input type="password" id="password" placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} />
 
             <button type="submit">Login</button>
 
