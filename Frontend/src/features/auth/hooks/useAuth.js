@@ -27,6 +27,10 @@ export const useAuth = () =>  {
         setLoading(false)
     }
 
+    useEffect(() => {
+        handleGetMe()
+    }, [])
+
     async function handleGetMe(){
         setLoading(true)
         const data = await getMe()
@@ -34,5 +38,5 @@ export const useAuth = () =>  {
         setLoading(false)
     }
 
-    return {handleRegister, handleLogin, handleLogout, handleGetMe}
+    return {handleRegister, handleLogin, handleLogout, handleGetMe, user, loading}
 }

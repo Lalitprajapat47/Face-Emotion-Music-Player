@@ -9,14 +9,14 @@ import { useAuth } from '../hooks/useAuth'
 
 const Register = () => {
   const { loading, handleRegister } = useAuth()
-  const [name, setName] = useState('')
+  const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    await handleRegister({ name, email, password })
+    await handleRegister({ username, email, password })
     navigate('/')
   }
 
@@ -31,8 +31,8 @@ const Register = () => {
           </div>
 
           <form className="auth-form" onSubmit={handleSubmit}>
-            <label htmlFor="name">Full name</label>
-            <input type="text" id="name" placeholder="Alex Morgan" value={name} onChange={(e) => setName(e.target.value)} />
+            <label htmlFor="username">Username</label>
+            <input type="text" id="username" placeholder="Alex Morgan" value={username} onChange={(e) => setUsername(e.target.value)} />
 
             <label htmlFor="email">Email address</label>
             <input type="email" id="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
