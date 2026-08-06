@@ -1,6 +1,6 @@
 const express = require("express")
-const upload = require("../middlewares/upload.middleware")
-const songController = require("../controllers/song.controller")
+const upload = require("../middleware/upload.middleware")
+const songController = require("../controller/song.controller")
 
 
 const router = express.Router()
