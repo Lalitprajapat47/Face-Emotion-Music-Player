@@ -1,10 +1,20 @@
 import React from 'react'
-import FaceExpression from './../../Expressions/components/FaceExpression'
+import FaceExpression from '../../Expression/components/FaceExpression'
+import Player from '../components/Player'
+import { useSong } from '../hooks/useSong'
 
 const Home = () => {
-  return (
-    <FaceExpression/>
-  )
+
+    const { handleGetSong } = useSong()
+
+    return (
+        <>
+            <FaceExpression
+                onClick={(expression) => { handleGetSong({ mood: expression }) }}
+            />
+            <Player />
+        </>
+    )
 }
 
 export default Home
