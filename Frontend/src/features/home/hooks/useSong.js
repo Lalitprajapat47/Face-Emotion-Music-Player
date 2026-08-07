@@ -1,4 +1,4 @@
-import { getSong } from "../service/song.api";
+import { getSong } from "../services/song.api";
 import { useContext } from "react";
 import { SongContext } from "../song.context";
 
