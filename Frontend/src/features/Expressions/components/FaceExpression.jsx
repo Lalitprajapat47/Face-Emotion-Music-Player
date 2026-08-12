@@ -9,9 +9,14 @@ export default function FaceExpression({ onClick = () => { } }) {
     const streamRef = useRef(null);
 
     const [expression, setExpression] = useState("Detecting...");
+    const [badgePulse, setBadgePulse] = useState(false);
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
         init({ landmarkerRef, videoRef, streamRef });
+
+        // trigger entrance animation
+        setMounted(true);
 
         return () => {
             if (landmarkerRef.current) {
@@ -28,6 +33,14 @@ export default function FaceExpression({ onClick = () => { } }) {
 
     async function handleClick() {
         const expression = detect({ landmarkerRef, videoRef, setExpression });
+
+            // pulse badge on expression change
+            useEffect(() => {
+                if (!expression) return;
+                setBadgePulse(true);
+                const t = setTimeout(() => setBadgePulse(false), 650);
+                return () => clearTimeout(t);
+            }, [expression]);
         onClick(expression);
     }
 
@@ -42,7 +55,7 @@ export default function FaceExpression({ onClick = () => { } }) {
                 <div className="expression-content">
                     <div className="video-wrap">
                         <video ref={videoRef} className="video-element" playsInline />
-                        <div className="expression-badge">{expression}</div>
+                        <div className={`expression-badge ${badgePulse ? 'pulse' : ''}`} aria-live="polite">{expression}</div>
                     </div>
 
                     <div className="controls">
