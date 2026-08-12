@@ -21,6 +21,11 @@
   opacity: 1 !important;
   z-index: 50;
 }
+.hero-content.visible {
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+  z-index: 50;
+}
 .hero-content {
   display: grid;
   grid-template-columns: 1fr 540px;
@@ -68,6 +73,14 @@
   justify-content: center;
   align-items: center;
   min-height: 300px;
+}
+
+.video-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));
 }
 
 .video-wrap::after {

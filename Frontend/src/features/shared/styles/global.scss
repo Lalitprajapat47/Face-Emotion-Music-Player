@@ -4,10 +4,94 @@
     box-sizing: border-box;
 }
 
-html, 
-body,
-#root {
-    font-family: 'Inter', sans-serif;
-    background-color: #282424;
-    color: #ffffff;
+:root{
+    /* Colors */
+    --bg-900: #06070a;
+    --bg-800: #0b1118;
+    --bg-700: #0f1720;
+    --card-bg: rgba(255,255,255,0.03);
+    --glass-border: rgba(255,255,255,0.04);
+    --muted: rgba(255,255,255,0.7);
+    --accent-a: #ff7a18; /* orange */
+    --accent-b: #7c3aed; /* purple */
+    --accent-grad: linear-gradient(135deg,var(--accent-a),var(--accent-b));
+    --radius: 16px;
 }
+
+html, body, #root {
+    height: 100%;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body{
+    background: radial-gradient(600px 300px at 50% 40%, rgba(124,58,237,0.06), transparent 20%), linear-gradient(180deg,var(--bg-800),var(--bg-900));
+    color: #fff;
+    min-height: 100%;
+}
+
+/* page container */
+.site-container{
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 36px 24px;
+}
+
+/* hero utilities */
+.hero-section{
+    display: flex;
+    align-items: center;
+    gap: 36px;
+    padding: 48px 0;
+}
+
+.glass-card{
+    background: var(--card-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    padding: 22px;
+    backdrop-filter: blur(8px) saturate(120%);
+    box-shadow: 0 20px 50px rgba(2,6,23,0.6);
+}
+
+h1, h2, h3, h4 {
+    color: #fff;
+    line-height: 1.05;
+}
+
+h1{ font-size: 44px; font-weight: 800 }
+h2{ font-size: 32px; font-weight: 700 }
+
+.lead{ color: var(--muted); font-size: 15px }
+
+/* primary button */
+.btn-primary{
+    display: inline-block;
+    background: var(--accent-grad);
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 999px;
+    font-weight: 700;
+    box-shadow: 0 12px 30px rgba(124,58,237,0.14);
+    cursor: pointer;
+}
+
+.btn-primary:hover{ transform: translateY(-3px); }
+
+/* small utilities */
+.muted{ color: var(--muted) }
+.rounded-lg{ border-radius: 20px }
+
+/* footer-like player spacing fix (avoid overlap) */
+.player-space{ padding-bottom: 96px }
+
+/* responsive adjustments */
+@media (max-width: 900px){
+    .hero-section{ flex-direction: column; align-items: center }
+    h1{ font-size: 32px }
+}
+
+/* keep existing auth styles priority but consistent */
+.auth-form button, .auth-page .auth-form button{ background: var(--accent-grad) }
