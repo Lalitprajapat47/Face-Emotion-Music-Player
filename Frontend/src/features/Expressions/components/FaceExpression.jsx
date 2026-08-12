@@ -45,24 +45,35 @@ export default function FaceExpression({ onClick = () => { } }) {
     }
 
     return (
-        <div className="expression-page">
-            <div className="expression-card">
-                <div className="expression-hero">
-                    <h1>Detecting...</h1>
-                    <p className="muted">Point your camera to your face and press the button</p>
+        <section className={`expression-hero-wrap ${mounted ? 'mounted' : ''}`}>
+            <nav className="ef-nav">
+                <div className="brand">Moodify</div>
+                <div className="nav-actions">
+                    <button className="nav-btn">Sign up</button>
                 </div>
+            </nav>
 
-                <div className="expression-content">
-                    <div className="video-wrap">
-                        <video ref={videoRef} className="video-element" playsInline />
-                        <div className={`expression-badge ${badgePulse ? 'pulse' : ''}`} aria-live="polite">{expression}</div>
+            <div className="hero-spot">
+                <div className="hero-content">
+                    <div className="hero-text">
+                        <h2>Detect expression</h2>
+                        <p className="lead">Realtime face expression detection powered by MediaPipe — try it now.</p>
                     </div>
 
-                    <div className="controls">
-                        <button className="btn-primary" onClick={handleClick}>Detect expression</button>
+                    <div className="expression-card">
+                        <div className="video-wrap">
+                            <video ref={videoRef} className="video-element" playsInline />
+                            <div className={`expression-badge ${badgePulse ? 'pulse' : ''}`} aria-live="polite">{expression}</div>
+                        </div>
+
+                        <div className="controls">
+                            <button className="btn-primary" onClick={handleClick}>Detect expression</button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+
+            <div className="decor-grid" aria-hidden="true" />
+        </section>
     );
 }
