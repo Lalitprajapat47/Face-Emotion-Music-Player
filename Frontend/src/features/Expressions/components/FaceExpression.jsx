@@ -3,7 +3,7 @@ import { detect, init } from "../utils/utils";
 import "../style/face-expression.scss";
 
 
-export default function FaceExpression({ onClick = () => { } }) {
+export default function FaceExpression({ onClick = () => { }, compact = false }) {
     const videoRef = useRef(null);
     const landmarkerRef = useRef(null);
     const streamRef = useRef(null);
@@ -80,6 +80,26 @@ export default function FaceExpression({ onClick = () => { } }) {
         const t = setTimeout(() => setBadgePulse(false), 650);
         return () => clearTimeout(t);
     }, [expression]);
+
+    // When `compact` is true we only render the card portion so the component
+    // can be embedded inside other layouts (like Home) without duplicating
+    // the page hero text or nav which was causing overlap.
+    if (compact) {
+        return (
+            <div className={`expression-card-compact ${mounted ? 'mounted' : ''}`}>
+                <div className="expression-card">
+                    <div className="video-wrap">
+                        <video ref={videoRef} className="video-element" playsInline />
+                        <div className={`expression-badge ${badgePulse ? 'pulse' : ''}`} aria-live="polite">{expression}</div>
+                    </div>
+
+                    <div className="controls">
+                        <button className="btn-primary" onClick={handleClick}>Detect expression</button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <section className={`expression-hero-wrap ${mounted ? 'mounted' : ''}`}>

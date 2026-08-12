@@ -1,0 +1,42 @@
+.neon-hero{
+  padding: 48px 24px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.hero-left{
+  flex:1;
+  max-width:640px;
+}
+
+.hero-title{
+  font-size:48px;
+  font-weight:800;
+  color:#fff;
+  margin:0 0 12px 0;
+}
+
+.hero-right{
+  width:420px;
+  display:flex;
+  justify-content:flex-end;
+}
+
+.neon-card{
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,40,40,0.06);
+  box-shadow: 0 40px 90px rgba(0,0,0,0.7), 0 8px 30px rgba(255,40,40,0.04) inset;
+  padding:22px;
+  border-radius:20px;
+}
+
+/* small adjustments to FaceExpression internals so it fits nicely */
+.expression-card{ max-width:360px }
+.video-wrap{ min-height:260px; max-height:340px }
+
+@media (max-width:900px){
+  .neon-hero{flex-direction:column;gap:28px}
+  .hero-right{width:100%;justify-content:center}
+  .hero-left{max-width:100%}
+}
