@@ -48,9 +48,6 @@ export default function FaceExpression({ onClick = () => { } }) {
         <section className={`expression-hero-wrap ${mounted ? 'mounted' : ''}`}>
             <nav className="ef-nav">
                 <div className="brand">Moodify</div>
-                <div className="nav-actions">
-                    <button className="nav-btn">Sign up</button>
-                </div>
             </nav>
 
             <div className="hero-spot">
