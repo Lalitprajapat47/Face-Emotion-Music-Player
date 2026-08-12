@@ -5,26 +5,64 @@ import {
 
 
 export const init = async ({ landmarkerRef, videoRef, streamRef }) => {
-    const vision = await FilesetResolver.forVisionTasks(
-        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
-    );
+    const status = {
+        ok: false,
+        modelLoaded: false,
+        cameraEnabled: false,
+        videoPlaying: false,
+        error: null,
+    };
 
-    landmarkerRef.current = await FaceLandmarker.createFromOptions(
-        vision,
-        {
-            baseOptions: {
-                modelAssetPath:
-                    "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task"
-            },
-            outputFaceBlendshapes: true,
-            runningMode: "VIDEO",
-            numFaces: 1
+    try {
+        const vision = await FilesetResolver.forVisionTasks(
+            "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
+        );
+
+        landmarkerRef.current = await FaceLandmarker.createFromOptions(
+            vision,
+            {
+                baseOptions: {
+                    modelAssetPath:
+                        "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task"
+                },
+                outputFaceBlendshapes: true,
+                runningMode: "VIDEO",
+                numFaces: 1
+            }
+        );
+        status.modelLoaded = true;
+
+        try {
+            streamRef.current = await navigator.mediaDevices.getUserMedia({ video: true });
+            status.cameraEnabled = true;
+        } catch (err) {
+            console.error("getUserMedia failed:", err);
+            status.error = { type: 'camera', message: err.message || String(err) };
+            return status;
         }
-    );
 
-    streamRef.current = await navigator.mediaDevices.getUserMedia({ video: true });
-    videoRef.current.srcObject = streamRef.current;
-    await videoRef.current.play();
+        if (!videoRef.current) {
+            status.error = { type: 'video-element', message: 'video element missing' };
+            return status;
+        }
+
+        videoRef.current.srcObject = streamRef.current;
+        try {
+            await videoRef.current.play();
+            status.videoPlaying = true;
+        } catch (err) {
+            console.warn("video play interrupted:", err);
+            status.videoPlaying = false;
+            status.error = { type: 'video-play', message: err.message || String(err) };
+        }
+
+        status.ok = true;
+        return status;
+    } catch (e) {
+        console.error("init failed:", e);
+        status.error = { type: 'init', message: e.message || String(e) };
+        return status;
+    }
 };
 
 export const detect = ({ landmarkerRef, videoRef, setExpression }) => {

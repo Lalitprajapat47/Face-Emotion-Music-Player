@@ -11,12 +11,23 @@ export default function FaceExpression({ onClick = () => { } }) {
     const [expression, setExpression] = useState("Detecting...");
     const [badgePulse, setBadgePulse] = useState(false);
     const [mounted, setMounted] = useState(false);
+    const [initStatus, setInitStatus] = useState(null);
 
     useEffect(() => {
-        init({ landmarkerRef, videoRef, streamRef });
+        let mountedFlag = true;
 
-        // trigger entrance animation
-        setMounted(true);
+        (async () => {
+            console.log("initializing face landmarker...");
+            const status = await init({ landmarkerRef, videoRef, streamRef });
+            console.log("init status:", status);
+            if (mountedFlag) {
+                setInitStatus(status);
+                if (!status.ok) {
+                    setExpression(status.error?.message || "Initialization failed");
+                }
+                setMounted(true);
+            }
+        })();
 
         return () => {
             if (landmarkerRef.current) {
@@ -31,18 +42,25 @@ export default function FaceExpression({ onClick = () => { } }) {
         };
     }, []);
 
+    async function handleInitRetry() {
+        setExpression("Retrying camera/model...");
+        const status = await init({ landmarkerRef, videoRef, streamRef });
+        setInitStatus(status);
+        if (!status.ok) setExpression(status.error?.message || "Initialization failed");
+    }
+
     async function handleClick() {
         const expression = detect({ landmarkerRef, videoRef, setExpression });
-
-            // pulse badge on expression change
-            useEffect(() => {
-                if (!expression) return;
-                setBadgePulse(true);
-                const t = setTimeout(() => setBadgePulse(false), 650);
-                return () => clearTimeout(t);
-            }, [expression]);
         onClick(expression);
     }
+
+    // pulse badge on expression change
+    useEffect(() => {
+        if (!expression) return;
+        setBadgePulse(true);
+        const t = setTimeout(() => setBadgePulse(false), 650);
+        return () => clearTimeout(t);
+    }, [expression]);
 
     return (
         <section className={`expression-hero-wrap ${mounted ? 'mounted' : ''}`}>
@@ -67,6 +85,18 @@ export default function FaceExpression({ onClick = () => { } }) {
                             <button className="btn-primary" onClick={handleClick}>Detect expression</button>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            {/* Debug/status box */}
+            <div className="debug-box" aria-live="polite">
+                <div>Init: {initStatus ? String(initStatus.ok) : 'starting...'}</div>
+                <div>Model: {initStatus ? String(initStatus.modelLoaded) : '...'}</div>
+                <div>Camera: {initStatus ? String(initStatus.cameraEnabled) : '...'}</div>
+                <div>VideoPlaying: {initStatus ? String(initStatus.videoPlaying) : '...'}</div>
+                <div className="debug-error">{initStatus && initStatus.error ? initStatus.error.type + ': ' + initStatus.error.message : ''}</div>
+                <div style={{ marginTop: 8 }}>
+                    <button className="btn-primary" onClick={handleInitRetry}>Retry camera</button>
                 </div>
             </div>
 
