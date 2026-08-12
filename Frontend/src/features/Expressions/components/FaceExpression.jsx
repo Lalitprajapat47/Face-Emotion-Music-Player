@@ -12,6 +12,7 @@ export default function FaceExpression({ onClick = () => { } }) {
     const [badgePulse, setBadgePulse] = useState(false);
     const [mounted, setMounted] = useState(false);
     const [initStatus, setInitStatus] = useState(null);
+    const rafRef = useRef(null);
 
     useEffect(() => {
         let mountedFlag = true;
@@ -48,6 +49,29 @@ export default function FaceExpression({ onClick = () => { } }) {
         setInitStatus(status);
         if (!status.ok) setExpression(status.error?.message || "Initialization failed");
     }
+
+    // start continuous detection loop when init OK
+    useEffect(() => {
+        let mounted = true;
+        function frame() {
+            try {
+                detect({ landmarkerRef, videoRef, setExpression });
+            } catch (e) {
+                console.warn('detect loop error', e);
+            }
+            rafRef.current = requestAnimationFrame(frame);
+        }
+
+        if (initStatus?.ok && mounted) {
+            // start loop
+            rafRef.current = requestAnimationFrame(frame);
+        }
+
+        return () => {
+            mounted = false;
+            if (rafRef.current) cancelAnimationFrame(rafRef.current);
+        };
+    }, [initStatus]);
 
     async function handleClick() {
         const expression = detect({ landmarkerRef, videoRef, setExpression });
