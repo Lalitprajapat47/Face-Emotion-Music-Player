@@ -7,7 +7,14 @@ const Protected = ({ children }) => {
 
 
     if (loading) {
-        return <div>Loading...</div>
+        return (
+            <div style={{display:'flex', alignItems:'center', justifyContent:'center', height:'60vh'}}>
+                <div className="loading-card">
+                    <div className="spinner" aria-hidden="true" />
+                    <div className="loading-text">Checking authentication…</div>
+                </div>
+            </div>
+        )
     }
 
     if (!user) {
