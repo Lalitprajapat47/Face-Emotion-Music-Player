@@ -8,23 +8,40 @@ export const useAuth = () =>  {
 
     async function handleRegister({email, password, username}){
         setLoading(true)
-        const data = await register({email, password, username})
-        setUser(data.user)
-        setLoading(false)
+        try {
+            const data = await register({email, password, username})
+            setUser(data.user)
+        } catch (err) {
+            setUser(null)
+            console.warn('register failed', err)
+        } finally {
+            setLoading(false)
+        }
     }
 
     async function handleLogin({email, password, username}){
         setLoading(true)
-        const data = await login({email, password, username})
-        setUser(data.user)
-        setLoading(false)
+        try {
+            const data = await login({email, password, username})
+            setUser(data.user)
+        } catch (err) {
+            setUser(null)
+            console.warn('login failed', err)
+        } finally {
+            setLoading(false)
+        }
     }
 
     async function handleLogout(){
         setLoading(true)
-        const data = await logout()
-        setUser(null)
-        setLoading(false)
+        try {
+            await logout()
+        } catch (err) {
+            console.warn('logout failed', err)
+        } finally {
+            setUser(null)
+            setLoading(false)
+        }
     }
 
     useEffect(() => {
@@ -33,9 +50,16 @@ export const useAuth = () =>  {
 
     async function handleGetMe(){
         setLoading(true)
-        const data = await getMe()
-        setUser(data.user)
-        setLoading(false)
+        try {
+            const data = await getMe()
+            setUser(data.user)
+        } catch (err) {
+            // unauthorized or network error — ensure we clear user and stop loading
+            setUser(null)
+            console.warn('getMe failed', err)
+        } finally {
+            setLoading(false)
+        }
     }
 
     return {handleRegister, handleLogin, handleLogout, handleGetMe, user, loading}
