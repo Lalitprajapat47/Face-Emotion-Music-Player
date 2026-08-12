@@ -88,17 +88,19 @@ export default function FaceExpression({ onClick = () => { } }) {
                 </div>
             </div>
 
-            {/* Debug/status box */}
-            <div className="debug-box" aria-live="polite">
-                <div>Init: {initStatus ? String(initStatus.ok) : 'starting...'}</div>
-                <div>Model: {initStatus ? String(initStatus.modelLoaded) : '...'}</div>
-                <div>Camera: {initStatus ? String(initStatus.cameraEnabled) : '...'}</div>
-                <div>VideoPlaying: {initStatus ? String(initStatus.videoPlaying) : '...'}</div>
-                <div className="debug-error">{initStatus && initStatus.error ? initStatus.error.type + ': ' + initStatus.error.message : ''}</div>
-                <div style={{ marginTop: 8 }}>
-                    <button className="btn-primary" onClick={handleInitRetry}>Retry camera</button>
+            {/* Debug/status box (visible only in development) */}
+            {process.env.NODE_ENV === 'development' && (
+                <div className="debug-box" aria-live="polite">
+                    <div>Init: {initStatus ? String(initStatus.ok) : 'starting...'}</div>
+                    <div>Model: {initStatus ? String(initStatus.modelLoaded) : '...'}</div>
+                    <div>Camera: {initStatus ? String(initStatus.cameraEnabled) : '...'}</div>
+                    <div>VideoPlaying: {initStatus ? String(initStatus.videoPlaying) : '...'}</div>
+                    <div className="debug-error">{initStatus && initStatus.error ? initStatus.error.type + ': ' + initStatus.error.message : ''}</div>
+                    <div style={{ marginTop: 8 }}>
+                        <button className="btn-primary" onClick={handleInitRetry}>Retry camera</button>
+                    </div>
                 </div>
-            </div>
+            )}
 
             <div className="decor-grid" aria-hidden="true" />
         </section>
