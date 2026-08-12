@@ -16,6 +16,11 @@
   padding: 28px;
 }
 
+.hero-content.visible {
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+  z-index: 50;
+}
 .hero-content {
   display: grid;
   grid-template-columns: 1fr 540px;

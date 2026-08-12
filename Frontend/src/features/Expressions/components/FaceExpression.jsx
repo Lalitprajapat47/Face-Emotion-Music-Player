@@ -69,7 +69,7 @@ export default function FaceExpression({ onClick = () => { } }) {
             </nav>
 
             <div className="hero-spot">
-                <div className="hero-content">
+                <div className={`hero-content ${initStatus?.ok ? 'visible' : ''}`}>
                     <div className="hero-text">
                         <h2>Detect expression</h2>
                         <p className="lead">Realtime face expression detection powered by MediaPipe — try it now.</p>
