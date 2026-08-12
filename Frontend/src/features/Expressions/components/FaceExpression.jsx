@@ -43,12 +43,7 @@ export default function FaceExpression({ onClick = () => { } }) {
         };
     }, []);
 
-    async function handleInitRetry() {
-        setExpression("Retrying camera/model...");
-        const status = await init({ landmarkerRef, videoRef, streamRef });
-        setInitStatus(status);
-        if (!status.ok) setExpression(status.error?.message || "Initialization failed");
-    }
+    // no manual retry UI — init runs automatically
 
     // start continuous detection loop when init OK
     useEffect(() => {
@@ -112,19 +107,7 @@ export default function FaceExpression({ onClick = () => { } }) {
                 </div>
             </div>
 
-            {/* Debug/status box (visible only in development) */}
-            {process.env.NODE_ENV === 'development' && (
-                <div className="debug-box" aria-live="polite">
-                    <div>Init: {initStatus ? String(initStatus.ok) : 'starting...'}</div>
-                    <div>Model: {initStatus ? String(initStatus.modelLoaded) : '...'}</div>
-                    <div>Camera: {initStatus ? String(initStatus.cameraEnabled) : '...'}</div>
-                    <div>VideoPlaying: {initStatus ? String(initStatus.videoPlaying) : '...'}</div>
-                    <div className="debug-error">{initStatus && initStatus.error ? initStatus.error.type + ': ' + initStatus.error.message : ''}</div>
-                    <div style={{ marginTop: 8 }}>
-                        <button className="btn-primary" onClick={handleInitRetry}>Retry camera</button>
-                    </div>
-                </div>
-            )}
+            {/* debug UI removed */}
 
             <div className="decor-grid" aria-hidden="true" />
         </section>
