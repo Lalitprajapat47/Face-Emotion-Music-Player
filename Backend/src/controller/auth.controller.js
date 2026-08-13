@@ -4,6 +4,13 @@ const jwt = require("jsonwebtoken")
 const blacklistModel = require("../models/blacklist.model")
 const redis = require("../config/cache")
 
+const isProduction = process.env.NODE_ENV === 'production'
+const cookieOptions = {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
+    path: '/',
+}
 
 async function registerUser(req, res) {
     const { username, email, password } = req.body
@@ -33,7 +40,7 @@ async function registerUser(req, res) {
         process.env.JWT_SECRET,
         { expiresIn: "1d" })
 
-    res.cookie("token", token)
+    res.cookie("token", token, cookieOptions)
     return res.status(201).json(
         {
             message: "User registered successfully",
@@ -70,7 +77,7 @@ async function loginUser(req, res) {
         { expiresIn: "1d" }
     )
 
-    res.cookie("token", token)
+    res.cookie("token", token, cookieOptions)
     return res.status(201).json(
         {
             message: "User logged in successfully",
@@ -86,7 +93,7 @@ async function getMe(req, res) {
 
 async function logoutUser(req, res) {
     const token = req.cookies.token
-    res.clearCookie("token")
+    res.clearCookie("token", cookieOptions)
 
     await redis.set(token, Date.now().toString(), "EX", 60 * 60)
 
