@@ -9,6 +9,7 @@ const allowedOrigins = [
     process.env.CLIENT_URL,
 ].filter(Boolean);
 
+app.use(express.static('public'));
 app.use(express.json())
 app.use(cookieParser())
 app.use(cors({
