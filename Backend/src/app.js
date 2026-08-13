@@ -13,16 +13,8 @@ app.use(express.static('public'));
 app.use(express.json())
 app.use(cookieParser())
 app.use(cors({
-    origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-            return;
-        }
-
-        callback(new Error('CORS not allowed for this origin'));
-    },
     credentials: true
-}))
+}));
 
 const authRoutes = require('./routes/auth.routes')
 const songRoutes = require('./routes/song.routes')
