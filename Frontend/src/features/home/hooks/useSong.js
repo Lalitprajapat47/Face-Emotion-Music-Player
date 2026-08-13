@@ -9,11 +9,23 @@ export const useSong = () => {
     const { loading, setLoading, song, setSong } = context
 
     async function handleGetSong({ mood }) {
+        if (!mood) return;
+
         setLoading(true)
-        const data = await getSong({ mood })
-        
-        setSong(data.song)
-        setLoading(false)
+
+        try {
+            const data = await getSong({ mood })
+            if (!data?.song) {
+                console.warn(`No song found for mood: ${mood}`)
+                setLoading(false)
+                return
+            }
+            setSong(data.song)
+        } catch (error) {
+            console.error('Failed to fetch song:', error)
+        } finally {
+            setLoading(false)
+        }
     }
 
     return ({ loading, song, handleGetSong })
