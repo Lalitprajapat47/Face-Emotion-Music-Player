@@ -5,6 +5,7 @@ const cors = require('cors');
 const app = express();
 const allowedOrigins = [
     'http://localhost:5173',
+    'http://localhost:4000',
     'https://face-emotion-music-player.onrender.com',
     'https://face-emotion-music-player-frontend.onrender.com',
     process.env.FRONTEND_URL,
