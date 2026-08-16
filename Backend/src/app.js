@@ -8,6 +8,7 @@ const allowedOrigins = [
     'http://localhost:4000',
     'https://face-emotion-music-player.onrender.com',
     'https://face-emotion-music-player-frontend.onrender.com',
+    'http://moodify-aws-alb-1957176276.ap-northeast-1.elb.amazonaws.com',
     process.env.FRONTEND_URL,
     process.env.CLIENT_URL,
 ].filter(Boolean);
