@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import FaceExpression from "../../Expressions/components/FaceExpression";
 import Player from "../components/Player";
 import { useSong } from "../hooks/useSong";
@@ -6,27 +6,43 @@ import { useAuth } from "../../auth/hooks/useAuth";
 import "../style/home.scss";
 
 const Home = () => {
-  const { songs, currentSong, playSong, setMoodFilter, activeMood } = useSong();
+  const { songs, currentSong, playSong, fetchSongs, mood: activeMood } = useSong();
   const { user, logout } = useAuth();
   const [selectedMood, setSelectedMood] = useState("all");
 
-  const handleMoodDetected = (mood) => {
-    if (mood) {
-      setMoodFilter(mood);
-      setSelectedMood(mood);
+  // Initial load
+  useEffect(() => {
+    if (fetchSongs) {
+      fetchSongs("all");
+    }
+  }, []);
+
+  // Face detect hone par gaane fetch aur auto-change
+  const handleMoodDetected = (detectedMood) => {
+    if (!detectedMood) return;
+    const cleanMood = detectedMood.toLowerCase();
+    
+    if (cleanMood !== selectedMood) {
+      setSelectedMood(cleanMood);
+      if (fetchSongs) {
+        fetchSongs(cleanMood);
+      }
     }
   };
 
+  // Manual chip click
   const handleMoodTab = (mood) => {
-    setSelectedMood(mood);
-    setMoodFilter(mood);
+    const cleanMood = mood.toLowerCase();
+    setSelectedMood(cleanMood);
+    if (fetchSongs) {
+      fetchSongs(cleanMood);
+    }
   };
 
   const availableMoods = ["all", "happy", "sad", "surprised", "neutral"];
 
   return (
     <div className="moodify-dashboard">
-      {/* Background Grid Lines from Syncly Visual */}
       <div className="grid-background-overlay">
         <div className="grid-col"></div>
         <div className="grid-col"></div>
@@ -34,7 +50,6 @@ const Home = () => {
         <div className="grid-col"></div>
       </div>
 
-      {/* Top Minimal Navigation */}
       <header className="dashboard-nav">
         <div className="brand-logo">
           <div className="brand-icon-box">
@@ -47,7 +62,7 @@ const Home = () => {
 
         <div className="nav-actions">
           <div className="user-profile">
-            <span className="username">{user?.username || "Guest User"}</span>
+            <span className="username">{user?.username || "User"}</span>
             <button className="logout-btn" onClick={logout} title="Sign Out">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -59,7 +74,6 @@ const Home = () => {
         </div>
       </header>
 
-      {/* Hero Header Section */}
       <section className="hero-syncly-section">
         <div className="ai-pill-tag">
           <span className="sparkle">✦</span>
@@ -73,32 +87,30 @@ const Home = () => {
         </p>
 
         <div className="mood-filter-tabs">
-          {availableMoods.map((mood) => (
+          {availableMoods.map((m) => (
             <button
-              key={mood}
-              className={`mood-tab ${selectedMood === mood ? "active" : ""}`}
-              onClick={() => handleMoodTab(mood)}
+              key={m}
+              className={`mood-tab ${selectedMood === m ? "active" : ""}`}
+              onClick={() => handleMoodTab(m)}
             >
-              {mood.toUpperCase()}
+              {m.toUpperCase()}
             </button>
           ))}
         </div>
       </section>
 
-      {/* Main Console Wrapper with Floating Badges */}
       <section className="dashboard-core-wrapper">
         <div className="floating-pill pill-left">
           <span className="pill-icon"></span>
-          <span>Customizable Dashboard</span>
+          <span>Adaptive Playlist</span>
         </div>
 
         <div className="floating-pill pill-right">
           <span className="pill-icon"></span>
-          <span>Camera Vision Active</span>
+          <span>Vision AI Linked</span>
         </div>
 
         <div className="master-console-card">
-          {/* Left: Tracks Playlist Pane */}
           <div className="tracks-pane">
             <div className="pane-top-bar">
               <div className="pane-title">
@@ -106,7 +118,7 @@ const Home = () => {
                 <span className="count-tag">{songs ? songs.length : 0}</span>
               </div>
               <div className="detected-pill">
-                Active: {activeMood || "Scanning..."}
+                Active: {selectedMood || activeMood || "neutral"}
               </div>
             </div>
 
@@ -118,12 +130,12 @@ const Home = () => {
                     <div
                       key={song._id || index}
                       className={`track-row ${isCurrent ? "is-active" : ""}`}
-                      onClick={() => playSong(song)}
+                      onClick={() => playSong && playSong(song)}
                     >
                       <span className="track-num">{index + 1}</span>
                       <div className="track-meta">
-                        <span className="track-title">{song.title || "Untitled Track"}</span>
-                        <span className="track-artist">{song.artist || "Ambient Artist"}</span>
+                        <span className="track-title">{song.title || song.name || "Untitled Track"}</span>
+                        <span className="track-artist">{song.artist || "Unknown Artist"}</span>
                       </div>
                       <span className="track-mood">{song.mood || "neutral"}</span>
                       <button className="track-play-trigger">
@@ -143,20 +155,18 @@ const Home = () => {
                 })
               ) : (
                 <div className="empty-tracks-placeholder">
-                  No audio tracks match this current frequency.
+                  No audio tracks match "{selectedMood}". Try another mood tab.
                 </div>
               )}
             </div>
           </div>
 
-          {/* Right: Camera Vision Sensor */}
           <aside className="scanner-pane">
             <FaceExpression onMoodDetected={handleMoodDetected} />
           </aside>
         </div>
       </section>
 
-      {/* Sticky Bottom Modern Player */}
       <Player />
     </div>
   );

@@ -6,7 +6,7 @@ const MOOD_EMOJIS = {
   happy: "😄",
   sad: "😢",
   surprised: "😲",
-  Neutral: "😐"
+  neutral: "😐"
 };
 
 const FaceExpression = ({ onMoodDetected }) => {
@@ -14,15 +14,13 @@ const FaceExpression = ({ onMoodDetected }) => {
   const streamRef = useRef(null);
   const landmarkerRef = useRef(null);
 
-  const [expression, setExpression] = useState("Neutral");
+  const [expression, setExpression] = useState("neutral");
   const [cameraActive, setCameraActive] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Song skipping avoid karne ke liye debouncer buffer
   const bufferRef = useRef([]);
-  const lastMoodRef = useRef(null);
+  const lastEmittedMoodRef = useRef(null);
 
-  // Setup MediaPipe and Camera
   useEffect(() => {
     let isMounted = true;
 
@@ -45,7 +43,6 @@ const FaceExpression = ({ onMoodDetected }) => {
     };
   }, []);
 
-  // Expression Detection Interval
   useEffect(() => {
     let intervalId;
 
@@ -58,25 +55,27 @@ const FaceExpression = ({ onMoodDetected }) => {
         });
 
         if (detected) {
-          // Debounce: 5 consecutive frames same hone par hi mood change notify karo
-          bufferRef.current.push(detected);
-          if (bufferRef.current.length > 5) bufferRef.current.shift();
+          const normalized = detected.toLowerCase();
 
-          const isConsistent = bufferRef.current.every((m) => m === detected);
-          if (isConsistent && detected !== lastMoodRef.current) {
-            lastMoodRef.current = detected;
+          // 3-frame quick stable check
+          bufferRef.current.push(normalized);
+          if (bufferRef.current.length > 3) bufferRef.current.shift();
+
+          const isConsistent = bufferRef.current.every((m) => m === normalized);
+          if (isConsistent && normalized !== lastEmittedMoodRef.current) {
+            lastEmittedMoodRef.current = normalized;
+            setExpression(normalized);
             if (onMoodDetected) {
-              onMoodDetected(detected.toLowerCase());
+              onMoodDetected(normalized);
             }
           }
         }
-      }, 350);
+      }, 400);
     }
 
     return () => clearInterval(intervalId);
   }, [cameraActive, isLoading, onMoodDetected]);
 
-  // Camera Toggle
   const toggleCamera = () => {
     if (cameraActive && streamRef.current) {
       streamRef.current.getTracks().forEach((t) => (t.enabled = !t.enabled));
@@ -94,7 +93,7 @@ const FaceExpression = ({ onMoodDetected }) => {
         <div className="status-indicator">
           <span className={`dot ${cameraActive ? "live" : "offline"}`}></span>
           <span className="label">
-            {isLoading ? "LOADING AI MODEL..." : cameraActive ? "AI SENSOR ACTIVE" : "CAMERA PAUSED"}
+            {isLoading ? "LOADING MODEL..." : cameraActive ? "AI SENSOR ACTIVE" : "CAMERA PAUSED"}
           </span>
         </div>
         <button className="cam-toggle-btn" onClick={toggleCamera}>
@@ -105,7 +104,6 @@ const FaceExpression = ({ onMoodDetected }) => {
       <div className="viewport-container">
         <video ref={videoRef} autoPlay playsInline muted className="webcam-feed" />
 
-        {/* HUD Scanner Frame */}
         <div className="hud-overlay">
           <div className="corner top-left"></div>
           <div className="corner top-right"></div>
@@ -114,9 +112,8 @@ const FaceExpression = ({ onMoodDetected }) => {
           {cameraActive && <div className="scanner-laser"></div>}
         </div>
 
-        {/* Floating Mood Chip */}
         <div className="floating-mood-chip">
-          <span className="mood-emoji">{MOOD_EMOJIS[expression] || "✨"}</span>
+          <span className="mood-emoji">{MOOD_EMOJIS[expression.toLowerCase()] || "✨"}</span>
           <span className="mood-name">{expression.toUpperCase()}</span>
         </div>
       </div>
