@@ -1,10 +1,8 @@
 .face-scanner-card {
-  background: rgba(22, 27, 34, 0.7);
+  background: #14151a;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
+  border-radius: 18px;
   padding: 1.25rem;
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -25,9 +23,8 @@
         border-radius: 50%;
 
         &.live {
-          background: #10b981;
-          box-shadow: 0 0 10px #10b981;
-          animation: pulse 1.8s infinite;
+          background: #f59e0b;
+          box-shadow: 0 0 10px #f59e0b;
         }
 
         &.offline {
@@ -37,25 +34,27 @@
 
       .label {
         font-size: 0.72rem;
-        letter-spacing: 0.08em;
+        letter-spacing: 0.06em;
         font-weight: 700;
-        color: rgba(255, 255, 255, 0.6);
+        color: #9ca3af;
       }
     }
 
     .cam-toggle-btn {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #e2e8f0;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #e5e7eb;
       padding: 0.35rem 0.8rem;
       border-radius: 8px;
       font-size: 0.75rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.2s;
 
       &:hover {
-        background: rgba(99, 102, 241, 0.2);
-        border-color: #6366f1;
+        background: rgba(245, 158, 11, 0.15);
+        border-color: #f59e0b;
+        color: #fcd34d;
       }
     }
   }
@@ -64,9 +63,10 @@
     position: relative;
     width: 100%;
     aspect-ratio: 4 / 3;
-    border-radius: 14px;
+    border-radius: 12px;
     overflow: hidden;
-    background: #090d16;
+    background: #090a0d;
+    border: 1px solid rgba(255, 255, 255, 0.05);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -75,17 +75,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transform: scaleX(-1); // mirror preview
-    }
-
-    .landmarks-canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
       transform: scaleX(-1);
-      pointer-events: none;
     }
 
     .hud-overlay {
@@ -95,9 +85,9 @@
 
       .corner {
         position: absolute;
-        width: 18px;
-        height: 18px;
-        border: 2px solid #6366f1;
+        width: 16px;
+        height: 16px;
+        border: 2px solid #f59e0b;
 
         &.top-left {
           top: 0;
@@ -130,8 +120,8 @@
         left: 0;
         right: 0;
         height: 2px;
-        background: linear-gradient(90deg, transparent, #818cf8, transparent);
-        box-shadow: 0 0 12px #818cf8;
+        background: linear-gradient(90deg, transparent, #f59e0b, transparent);
+        box-shadow: 0 0 12px #f59e0b;
         animation: scanMove 3s ease-in-out infinite;
       }
     }
@@ -141,67 +131,17 @@
       bottom: 12px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(15, 23, 42, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(12px);
-      padding: 0.4rem 0.9rem;
+      background: rgba(15, 16, 20, 0.9);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      backdrop-filter: blur(10px);
+      padding: 0.35rem 0.85rem;
       border-radius: 999px;
       display: flex;
       align-items: center;
       gap: 0.45rem;
       color: #fff;
-      font-size: 0.8rem;
-      font-weight: 600;
-
-      .mood-pct {
-        background: rgba(99, 102, 241, 0.3);
-        color: #a5b4fc;
-        padding: 0.1rem 0.35rem;
-        border-radius: 6px;
-        font-size: 0.7rem;
-      }
-    }
-  }
-
-  .confidence-meters {
-    display: flex;
-    flex-direction: column;
-    gap: 0.45rem;
-
-    .meter-row {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      font-size: 0.75rem;
-      color: rgba(255, 255, 255, 0.7);
-
-      .meter-name {
-        width: 60px;
-        text-transform: capitalize;
-      }
-
-      .meter-track {
-        flex: 1;
-        height: 6px;
-        background: rgba(255, 255, 255, 0.08);
-        border-radius: 999px;
-        overflow: hidden;
-
-        .meter-fill {
-          height: 100%;
-          background: linear-gradient(90deg, #6366f1, #a855f7);
-          border-radius: 999px;
-          transition: width 0.25s ease;
-        }
-      }
-
-      .meter-val {
-        width: 32px;
-        text-align: right;
-        font-variant-numeric: tabular-nums;
-        font-size: 0.7rem;
-        color: rgba(255, 255, 255, 0.5);
-      }
+      font-size: 0.78rem;
+      font-weight: 700;
     }
   }
 }
@@ -214,20 +154,5 @@
   50% {
     top: 92%;
     opacity: 1;
-  }
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(0.95);
-    opacity: 0.8;
-  }
-  50% {
-    transform: scale(1.15);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(0.95);
-    opacity: 0.8;
   }
 }

@@ -1,31 +1,165 @@
-import React from 'react'
-import FaceExpression from '../../Expressions/components/FaceExpression'
-import Player from '../components/Player'
-import { useSong } from '../hooks/useSong'
-import '../style/home.scss'
+import React, { useState } from "react";
+import FaceExpression from "../../Expressions/components/FaceExpression";
+import Player from "../components/Player";
+import { useSong } from "../hooks/useSong";
+import { useAuth } from "../../auth/hooks/useAuth";
+import "../style/home.scss";
 
 const Home = () => {
-    const { handleGetSong } = useSong()
+  const { songs, currentSong, playSong, setMoodFilter, activeMood } = useSong();
+  const { user, logout } = useAuth();
+  const [selectedMood, setSelectedMood] = useState("all");
 
-    return (
-        <div className="site-container home-hero">
-            <section className="hero-section neon-hero">
-                <div className="hero-left">
-                    <p className="eyebrow">Realtime</p>
-                    <h1 className="hero-title">Detect expression</h1>
-                    <p className="lead">Realtime face expression detection powered by MediaPipe — try it now.</p>
-                </div>
+  const handleMoodDetected = (mood) => {
+    if (mood) {
+      setMoodFilter(mood);
+      setSelectedMood(mood);
+    }
+  };
 
-                <div className="hero-right">
-                    <div className="glass-card neon-card">
-                            <FaceExpression compact onClick={(expression) => { handleGetSong({ mood: expression }) }} />
-                        </div>
-                </div>
-            </section>
+  const handleMoodTab = (mood) => {
+    setSelectedMood(mood);
+    setMoodFilter(mood);
+  };
 
-            <Player />
+  const availableMoods = ["all", "happy", "sad", "surprised", "neutral"];
+
+  return (
+    <div className="moodify-dashboard">
+      {/* Background Grid Lines from Syncly Visual */}
+      <div className="grid-background-overlay">
+        <div className="grid-col"></div>
+        <div className="grid-col"></div>
+        <div className="grid-col"></div>
+        <div className="grid-col"></div>
+      </div>
+
+      {/* Top Minimal Navigation */}
+      <header className="dashboard-nav">
+        <div className="brand-logo">
+          <div className="brand-icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+            </svg>
+          </div>
+          <h2>Moodify<span>.ai</span></h2>
         </div>
-    )
-}
 
-export default Home
+        <div className="nav-actions">
+          <div className="user-profile">
+            <span className="username">{user?.username || "Guest User"}</span>
+            <button className="logout-btn" onClick={logout} title="Sign Out">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero Header Section */}
+      <section className="hero-syncly-section">
+        <div className="ai-pill-tag">
+          <span className="sparkle">✦</span>
+          <span>Real-time Neural Audio Engine</span>
+        </div>
+
+        <h1 className="hero-main-heading">Syncly</h1>
+
+        <p className="hero-sub-description">
+          Detect facial landmarks, categorize emotional drivers, and curate high-fidelity sonic flows automatically.
+        </p>
+
+        <div className="mood-filter-tabs">
+          {availableMoods.map((mood) => (
+            <button
+              key={mood}
+              className={`mood-tab ${selectedMood === mood ? "active" : ""}`}
+              onClick={() => handleMoodTab(mood)}
+            >
+              {mood.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* Main Console Wrapper with Floating Badges */}
+      <section className="dashboard-core-wrapper">
+        <div className="floating-pill pill-left">
+          <span className="pill-icon"></span>
+          <span>Customizable Dashboard</span>
+        </div>
+
+        <div className="floating-pill pill-right">
+          <span className="pill-icon"></span>
+          <span>Camera Vision Active</span>
+        </div>
+
+        <div className="master-console-card">
+          {/* Left: Tracks Playlist Pane */}
+          <div className="tracks-pane">
+            <div className="pane-top-bar">
+              <div className="pane-title">
+                <h3>Vibe Queue</h3>
+                <span className="count-tag">{songs ? songs.length : 0}</span>
+              </div>
+              <div className="detected-pill">
+                Active: {activeMood || "Scanning..."}
+              </div>
+            </div>
+
+            <div className="tracks-table">
+              {songs && songs.length > 0 ? (
+                songs.map((song, index) => {
+                  const isCurrent = currentSong?._id === song._id;
+                  return (
+                    <div
+                      key={song._id || index}
+                      className={`track-row ${isCurrent ? "is-active" : ""}`}
+                      onClick={() => playSong(song)}
+                    >
+                      <span className="track-num">{index + 1}</span>
+                      <div className="track-meta">
+                        <span className="track-title">{song.title || "Untitled Track"}</span>
+                        <span className="track-artist">{song.artist || "Ambient Artist"}</span>
+                      </div>
+                      <span className="track-mood">{song.mood || "neutral"}</span>
+                      <button className="track-play-trigger">
+                        {isCurrent ? (
+                          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                            <rect x="6" y="4" width="4" height="16"></rect>
+                            <rect x="14" y="4" width="4" height="16"></rect>
+                          </svg>
+                        ) : (
+                          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="empty-tracks-placeholder">
+                  No audio tracks match this current frequency.
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right: Camera Vision Sensor */}
+          <aside className="scanner-pane">
+            <FaceExpression onMoodDetected={handleMoodDetected} />
+          </aside>
+        </div>
+      </section>
+
+      {/* Sticky Bottom Modern Player */}
+      <Player />
+    </div>
+  );
+};
+
+export default Home;
