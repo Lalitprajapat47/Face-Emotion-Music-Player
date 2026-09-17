@@ -14,13 +14,14 @@ export const init = async ({ landmarkerRef, videoRef, streamRef }) => {
     };
 
     try {
-        const vision = await FilesetResolver.forVisionTasks(
+        // Kick off model loading AND camera permission request at the same
+        // time instead of one after another — this way the browser's camera
+        // prompt shows up immediately instead of waiting for the (slow)
+        // MediaPipe model download to finish first.
+        const modelPromise = FilesetResolver.forVisionTasks(
             "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
-        );
-
-        landmarkerRef.current = await FaceLandmarker.createFromOptions(
-            vision,
-            {
+        ).then((vision) =>
+            FaceLandmarker.createFromOptions(vision, {
                 baseOptions: {
                     modelAssetPath:
                         "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task"
@@ -28,16 +29,28 @@ export const init = async ({ landmarkerRef, videoRef, streamRef }) => {
                 outputFaceBlendshapes: true,
                 runningMode: "VIDEO",
                 numFaces: 1
-            }
+            })
         );
-        status.modelLoaded = true;
 
-        try {
-            streamRef.current = await navigator.mediaDevices.getUserMedia({ video: true });
+        const cameraPromise = navigator.mediaDevices.getUserMedia({ video: true });
+
+        const [landmarker, cameraResult] = await Promise.allSettled([modelPromise, cameraPromise]);
+
+        if (landmarker.status === "fulfilled") {
+            landmarkerRef.current = landmarker.value;
+            status.modelLoaded = true;
+        } else {
+            console.error("model load failed:", landmarker.reason);
+            status.error = { type: 'model', message: landmarker.reason?.message || String(landmarker.reason) };
+            return status;
+        }
+
+        if (cameraResult.status === "fulfilled") {
+            streamRef.current = cameraResult.value;
             status.cameraEnabled = true;
-        } catch (err) {
-            console.error("getUserMedia failed:", err);
-            status.error = { type: 'camera', message: err.message || String(err) };
+        } else {
+            console.error("getUserMedia failed:", cameraResult.reason);
+            status.error = { type: 'camera', message: cameraResult.reason?.message || String(cameraResult.reason) };
             return status;
         }
 
