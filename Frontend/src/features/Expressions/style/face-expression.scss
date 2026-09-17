@@ -24,7 +24,6 @@
 
         &.live {
           background: #f59e0b;
-          box-shadow: 0 0 10px #f59e0b;
         }
 
         &.offline {
@@ -39,24 +38,6 @@
         color: #9ca3af;
       }
     }
-
-    .cam-toggle-btn {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      color: #e5e7eb;
-      padding: 0.35rem 0.8rem;
-      border-radius: 8px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-
-      &:hover {
-        background: rgba(245, 158, 11, 0.15);
-        border-color: #f59e0b;
-        color: #fcd34d;
-      }
-    }
   }
 
   .viewport-container {
@@ -67,9 +48,6 @@
     overflow: hidden;
     background: #090a0d;
     border: 1px solid rgba(255, 255, 255, 0.05);
-    display: flex;
-    align-items: center;
-    justify-content: center;
 
     .webcam-feed {
       width: 100%;
@@ -114,16 +92,6 @@
           border-top: none;
         }
       }
-
-      .scanner-laser {
-        position: absolute;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: linear-gradient(90deg, transparent, #f59e0b, transparent);
-        box-shadow: 0 0 12px #f59e0b;
-        animation: scanMove 3s ease-in-out infinite;
-      }
     }
 
     .floating-mood-chip {
@@ -131,28 +99,13 @@
       bottom: 12px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(15, 16, 20, 0.9);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      backdrop-filter: blur(10px);
+      background: rgba(15, 16, 20, 0.95);
+      border: 1px solid rgba(245, 158, 11, 0.4);
       padding: 0.35rem 0.85rem;
       border-radius: 999px;
-      display: flex;
-      align-items: center;
-      gap: 0.45rem;
       color: #fff;
       font-size: 0.78rem;
       font-weight: 700;
     }
-  }
-}
-
-@keyframes scanMove {
-  0%, 100% {
-    top: 5%;
-    opacity: 0.2;
-  }
-  50% {
-    top: 92%;
-    opacity: 1;
   }
 }

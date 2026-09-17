@@ -1,39 +1,29 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import { init, detect } from "../utils/utils";
 import "../style/face-expression.scss";
-
-const MOOD_EMOJIS = {
-  happy: "😄",
-  sad: "😢",
-  surprised: "😲",
-  neutral: "😐"
-};
 
 const FaceExpression = ({ onMoodDetected }) => {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const landmarkerRef = useRef(null);
 
-  const [expression, setExpression] = useState("neutral");
+  const [expression, setExpression] = useState("Neutral");
   const [cameraActive, setCameraActive] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  
+  const lastEmittedRef = useRef("");
+  const isInitializingRef = useRef(false);
 
-  const bufferRef = useRef([]);
-  const lastEmittedMoodRef = useRef(null);
-
+  // 1. Initialize camera and model once
   useEffect(() => {
+    if (isInitializingRef.current) return;
+    isInitializingRef.current = true;
+
     let isMounted = true;
-
-    const setup = async () => {
-      setIsLoading(true);
-      const res = await init({ landmarkerRef, videoRef, streamRef });
-      if (isMounted) {
-        setCameraActive(Boolean(res.ok));
-        setIsLoading(false);
+    init({ landmarkerRef, videoRef, streamRef }).then((res) => {
+      if (isMounted && res.ok) {
+        setCameraActive(true);
       }
-    };
-
-    setup();
+    });
 
     return () => {
       isMounted = false;
@@ -43,49 +33,38 @@ const FaceExpression = ({ onMoodDetected }) => {
     };
   }, []);
 
-  useEffect(() => {
-    let intervalId;
+  // 2. Ultra-lightweight 1-second interval (Zero CPU Lag)
+  const handleMoodDetectedMemo = useCallback((mood) => {
+    if (onMoodDetected) {
+      onMoodDetected(mood);
+    }
+  }, [onMoodDetected]);
 
-    if (cameraActive && !isLoading) {
-      intervalId = setInterval(() => {
+  useEffect(() => {
+    if (!cameraActive) return;
+
+    const intervalId = setInterval(() => {
+      try {
         const detected = detect({
           landmarkerRef,
           videoRef,
-          setExpression
+          setExpression,
         });
 
         if (detected) {
-          const normalized = detected.toLowerCase();
-
-          // 3-frame quick stable check
-          bufferRef.current.push(normalized);
-          if (bufferRef.current.length > 3) bufferRef.current.shift();
-
-          const isConsistent = bufferRef.current.every((m) => m === normalized);
-          if (isConsistent && normalized !== lastEmittedMoodRef.current) {
-            lastEmittedMoodRef.current = normalized;
-            setExpression(normalized);
-            if (onMoodDetected) {
-              onMoodDetected(normalized);
-            }
+          const clean = detected.toLowerCase();
+          if (clean !== lastEmittedRef.current) {
+            lastEmittedRef.current = clean;
+            handleMoodDetectedMemo(clean);
           }
         }
-      }, 400);
-    }
+      } catch (e) {
+        // Safe catch for frame skips
+      }
+    }, 1000); // Har 1 second me check karega, lag bilkul khatam
 
     return () => clearInterval(intervalId);
-  }, [cameraActive, isLoading, onMoodDetected]);
-
-  const toggleCamera = () => {
-    if (cameraActive && streamRef.current) {
-      streamRef.current.getTracks().forEach((t) => (t.enabled = !t.enabled));
-      setCameraActive((prev) => !prev);
-    } else {
-      init({ landmarkerRef, videoRef, streamRef }).then((res) => {
-        setCameraActive(Boolean(res.ok));
-      });
-    }
-  };
+  }, [cameraActive, handleMoodDetectedMemo]);
 
   return (
     <div className="face-scanner-card">
@@ -93,12 +72,9 @@ const FaceExpression = ({ onMoodDetected }) => {
         <div className="status-indicator">
           <span className={`dot ${cameraActive ? "live" : "offline"}`}></span>
           <span className="label">
-            {isLoading ? "LOADING MODEL..." : cameraActive ? "AI SENSOR ACTIVE" : "CAMERA PAUSED"}
+            {cameraActive ? "AI SENSOR ACTIVE" : "INITIALIZING..."}
           </span>
         </div>
-        <button className="cam-toggle-btn" onClick={toggleCamera}>
-          {cameraActive ? "Pause" : "Resume"}
-        </button>
       </div>
 
       <div className="viewport-container">
@@ -109,11 +85,9 @@ const FaceExpression = ({ onMoodDetected }) => {
           <div className="corner top-right"></div>
           <div className="corner bottom-left"></div>
           <div className="corner bottom-right"></div>
-          {cameraActive && <div className="scanner-laser"></div>}
         </div>
 
         <div className="floating-mood-chip">
-          <span className="mood-emoji">{MOOD_EMOJIS[expression.toLowerCase()] || "✨"}</span>
           <span className="mood-name">{expression.toUpperCase()}</span>
         </div>
       </div>
