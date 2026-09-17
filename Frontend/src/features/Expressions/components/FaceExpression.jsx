@@ -1,5 +1,9 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
-import * as faceapi from "face-api.js";
+import {
+  loadModels,
+  detectFaceLandmarksAndExpressions,
+  drawFaceLandmarksAndExpressions
+} from "../utils/utils";
 import "../style/face-expression.scss";
 
 const MOOD_EMOJIS = {
@@ -22,30 +26,26 @@ const FaceExpression = ({ onMoodDetected }) => {
   const [confidence, setConfidence] = useState(0);
   const [allConfidences, setAllConfidences] = useState([]);
 
-  // Stability counters taaki har millisecond pe mood na badle
+  // Stability sliding window (debouncer taaki sudden skips na hon)
   const moodBufferRef = useRef([]);
-  const BUFFER_SIZE = 6; // ~1.5 - 2 seconds continuous reading
+  const BUFFER_SIZE = 5;
   const lastEmittedMoodRef = useRef(null);
 
-  // 1. Load Face-API Models
+  // 1. Existing utils se models load karna
   useEffect(() => {
-    const loadModels = async () => {
-      try {
-        const MODEL_URL = "/models"; // ensure models public/models me hon
-        await Promise.all([
-          faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-          faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-          faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL)
-        ]);
-        setModelsLoaded(true);
-      } catch (err) {
-        console.error("Face-api models load nahi ho paye:", err);
-      }
+    let isMounted = true;
+    loadModels()
+      .then(() => {
+        if (isMounted) setModelsLoaded(true);
+      })
+      .catch((err) => console.error("Error loading models:", err));
+
+    return () => {
+      isMounted = false;
     };
-    loadModels();
   }, []);
 
-  // 2. Start Video Stream
+  // 2. Camera stream handle karna
   const startVideo = useCallback(async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -57,12 +57,11 @@ const FaceExpression = ({ onMoodDetected }) => {
         setCameraActive(true);
       }
     } catch (err) {
-      console.error("Camera access error:", err);
+      console.error("Camera access failed:", err);
       setCameraActive(false);
     }
   }, []);
 
-  // Stop Video Stream
   const stopVideo = () => {
     if (videoRef.current && videoRef.current.srcObject) {
       const tracks = videoRef.current.srcObject.getTracks();
@@ -79,25 +78,24 @@ const FaceExpression = ({ onMoodDetected }) => {
     return () => stopVideo();
   }, [modelsLoaded, startVideo]);
 
-  // 3. Stable Emotion Calculation
+  // 3. Dominant & stable mood calculation
   const processStableMood = (detectedExpressions) => {
-    // Sort highest emotion
+    if (!detectedExpressions) return;
     const sorted = Object.entries(detectedExpressions).sort((a, b) => b[1] - a[1]);
+    if (!sorted.length) return;
+
     const [dominantMood, score] = sorted[0];
 
-    // Set preview meter
     setConfidence(Math.round(score * 100));
-    setAllConfidences(sorted.slice(0, 3)); // Top 3 moods
+    setAllConfidences(sorted.slice(0, 3));
 
-    // Add to sliding window
     moodBufferRef.current.push(dominantMood);
     if (moodBufferRef.current.length > BUFFER_SIZE) {
       moodBufferRef.current.shift();
     }
 
-    // Check consistency
     const isStable = moodBufferRef.current.every((m) => m === dominantMood);
-    if (isStable && dominantMood !== lastEmittedMoodRef.current && score > 0.6) {
+    if (isStable && dominantMood !== lastEmittedMoodRef.current && score > 0.55) {
       lastEmittedMoodRef.current = dominantMood;
       setCurrentMood(dominantMood);
       if (onMoodDetected) {
@@ -106,39 +104,31 @@ const FaceExpression = ({ onMoodDetected }) => {
     }
   };
 
-  // 4. Detection Interval Loop
+  // 4. Detection loop (300ms light throttling)
   useEffect(() => {
     let intervalId;
     if (cameraActive && modelsLoaded) {
       intervalId = setInterval(async () => {
         if (!videoRef.current || videoRef.current.paused || videoRef.current.ended) return;
 
-        const detections = await faceapi
-          .detectSingleFace(videoRef.current, new faceapi.TinyFaceDetectorOptions())
-          .withFaceLandmarks()
-          .withFaceExpressions();
+        try {
+          const detections = await detectFaceLandmarksAndExpressions(videoRef.current);
 
-        if (detections && canvasRef.current) {
-          const displaySize = {
-            width: videoRef.current.videoWidth || 320,
-            height: videoRef.current.videoHeight || 240
-          };
-          faceapi.matchDimensions(canvasRef.current, displaySize);
+          if (detections && canvasRef.current) {
+            drawFaceLandmarksAndExpressions(
+              videoRef.current,
+              canvasRef.current,
+              detections
+            );
 
-          const resizedDetections = faceapi.resizeResults(detections, displaySize);
-          const ctx = canvasRef.current.getContext("2d");
-          ctx.clearRect(0, 0, displaySize.width, displaySize.height);
-
-          // Subtle custom dot landmark drawing
-          faceapi.draw.drawFaceLandmarks(canvasRef.current, resizedDetections, {
-            drawLines: false,
-            color: "#6366f1",
-            lineWidth: 1
-          });
-
-          processStableMood(detections.expressions);
+            if (detections.expressions) {
+              processStableMood(detections.expressions);
+            }
+          }
+        } catch (error) {
+          // Frame drop safe catch
         }
-      }, 300); // 300ms throttle keeps CPU light
+      }, 300);
     }
 
     return () => clearInterval(intervalId);
@@ -149,7 +139,9 @@ const FaceExpression = ({ onMoodDetected }) => {
       <div className="scanner-header">
         <div className="status-indicator">
           <span className={`dot ${cameraActive ? "live" : "offline"}`}></span>
-          <span className="label">{cameraActive ? "AI SENSOR ACTIVE" : "CAMERA OFF"}</span>
+          <span className="label">
+            {cameraActive ? "AI SENSOR ACTIVE" : "CAMERA OFF"}
+          </span>
         </div>
         <button
           className="cam-toggle-btn"
@@ -163,7 +155,7 @@ const FaceExpression = ({ onMoodDetected }) => {
         <video ref={videoRef} autoPlay muted playsInline className="webcam-feed" />
         <canvas ref={canvasRef} className="landmarks-canvas" />
 
-        {/* HUD Targeting Overlay */}
+        {/* HUD Scanner Frame */}
         <div className="hud-overlay">
           <div className="corner top-left"></div>
           <div className="corner top-right"></div>
@@ -172,7 +164,7 @@ const FaceExpression = ({ onMoodDetected }) => {
           <div className="scanner-laser"></div>
         </div>
 
-        {/* Current Mood Chip Tag */}
+        {/* Floating Detected Mood Badge */}
         <div className="floating-mood-chip">
           <span className="mood-emoji">{MOOD_EMOJIS[currentMood] || "✨"}</span>
           <span className="mood-name">{currentMood.toUpperCase()}</span>
@@ -180,7 +172,7 @@ const FaceExpression = ({ onMoodDetected }) => {
         </div>
       </div>
 
-      {/* Real-time confidence bars */}
+      {/* Real-time Confidence Meters */}
       <div className="confidence-meters">
         {allConfidences.map(([mood, val]) => (
           <div key={mood} className="meter-row">
