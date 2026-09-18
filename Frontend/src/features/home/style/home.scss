@@ -1,73 +1,223 @@
-.neon-hero{
-  padding: 56px 24px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap: 48px;
+.home-hero {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 80px);
+  justify-content: space-between;
+  gap: 60px;
 }
 
-.hero-left{
-  flex:1;
-  max-width:520px;
-}
-
-.eyebrow{
-  display: inline-flex;
+/* Studio Navigation / Header micro-strip */
+.studio-nav {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 500;
-  color: rgba(255,255,255,0.6);
-  margin: 0 0 16px 0;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border-hairline);
+
+  .brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: var(--text-primary);
+
+    .symbol {
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+
+    .reg-mark {
+      font-size: 0.65rem;
+      font-family: var(--font-body);
+      vertical-align: super;
+      opacity: 0.6;
+    }
+  }
+
+  .tech-stamp {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    letter-spacing: 0.04em;
+  }
 }
 
-.eyebrow-dot{
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--mood-detecting);
-  box-shadow: 0 0 0 0 rgba(111,118,132,0.5);
-  animation: eyebrowPulse 2200ms ease-out infinite;
+.neon-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 56px;
+  padding: 40px 0 20px;
+
+  @media (max-width: 960px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 40px;
+  }
 }
 
-@keyframes eyebrowPulse{
-  0% { box-shadow: 0 0 0 0 rgba(111,118,132,0.5); }
-  70% { box-shadow: 0 0 0 7px rgba(111,118,132,0); }
-  100% { box-shadow: 0 0 0 0 rgba(111,118,132,0); }
+.hero-left {
+  flex: 1;
+  max-width: 580px;
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+
+    .eyebrow-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--mood-current);
+      transition: background 0.3s ease;
+    }
+  }
+
+  .hero-title {
+    font-size: clamp(2.6rem, 5vw, 4.4rem);
+    font-weight: 800;
+    line-height: 1.02;
+    margin-bottom: 24px;
+    color: var(--text-primary);
+
+    .faded {
+      color: var(--text-muted);
+      display: block;
+      font-weight: 700;
+    }
+  }
+
+  .lead {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    max-width: 480px;
+  }
 }
 
-.hero-title{
-  font-family: var(--font-display);
-  font-size: 44px;
-  font-weight: 700;
-  line-height: 1.08;
-  letter-spacing: -0.01em;
-  color:#fff;
-  margin:0 0 14px 0;
-}
-
-.hero-right{
-  width: 400px;
+.hero-right {
+  width: 440px;
   flex-shrink: 0;
-  display:flex;
-  justify-content:flex-end;
+
+  @media (max-width: 960px) {
+    width: 100%;
+    max-width: 480px;
+  }
 }
 
-/* the compact card embedded on Home carries its own mood-reactive border
-   and shadow (see face-expression.scss) — no extra wrapper card here, so
-   we avoid a card-inside-a-card look */
-.expression-card-compact{
+.expression-card-compact {
   width: 100%;
 }
 
-.expression-card-compact .expression-card{
-  max-width: none;
-  width: 100%;
-}
+/* Minimalist Audio Dock Player */
+.studio-player-bar {
+  background: var(--bg-surface-subtle);
+  backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--border-hairline);
+  border-radius: 18px;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.04);
+  margin-top: 40px;
 
-@media (max-width:900px){
-  .neon-hero{flex-direction:column;gap:32px}
-  .hero-right{width:100%;max-width:420px;justify-content:center}
-  .hero-left{max-width:100%;text-align:center}
-  .eyebrow{justify-content:center}
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .player-track {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 200px;
+
+    .track-thumb {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: #000;
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .track-info {
+      h4 {
+        font-size: 0.95rem;
+        font-weight: 700;
+        margin-bottom: 2px;
+      }
+      p {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+      }
+    }
+  }
+
+  .player-scrubber {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    span {
+      font-family: ui-monospace, monospace;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .timeline {
+      flex: 1;
+      height: 4px;
+      background: rgba(0, 0, 0, 0.06);
+      border-radius: 99px;
+      position: relative;
+
+      .fill {
+        position: absolute;
+        height: 100%;
+        background: var(--text-primary);
+        border-radius: 99px;
+      }
+    }
+  }
+
+  .player-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    .btn-dock-play {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--text-primary);
+      color: #fff;
+      border: none;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+
+      &:hover {
+        transform: scale(1.05);
+      }
+    }
+  }
 }

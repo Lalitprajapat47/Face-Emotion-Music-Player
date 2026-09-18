@@ -1,222 +1,140 @@
-.expression-hero-wrap {
-  min-height: 80vh;
-  width: 100%;
-  display: block;
-  position: relative;
-  background: radial-gradient(ellipse at center, rgba(124,58,237,0.08) 0%, rgba(0,0,0,0.0) 40%), linear-gradient(180deg, #071026 0%, #0b1118 60%);
-  padding: 48px 28px 80px 28px;
-  overflow: hidden;
-}
-
-.hero-spot {
-  max-width: 1100px;
-  margin: 0 auto;
-  position: relative;
-  padding: 28px;
-}
-
-.hero-content.visible {
-  transform: translateY(0) !important;
-  opacity: 1 !important;
-  z-index: 50;
-}
-.hero-content {
-  display: grid;
-  grid-template-columns: 1fr 540px;
-  gap: 36px;
-  align-items: center;
-}
-
-.hero-text h2 {
-  margin: 0;
-  font-size: 42px;
-  color: rgba(255,255,255,0.94);
-  font-weight: 800;
-  line-height: 1.02;
-  letter-spacing: -0.01em;
-}
-
-.hero-text .lead {
-  margin-top: 12px;
-  color: rgba(255,255,255,0.76);
-  font-size: 16px;
-}
-
-
 .expression-card {
   width: 100%;
-  max-width: 540px;
-  border-radius: 20px;
-  overflow: visible;
-  display: block;
-  box-shadow: 0 30px 80px rgba(2,6,23,0.6), 0 8px 26px rgba(9,12,20,0.5);
-  border: 1px solid rgba(255,255,255,0.06);
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  backdrop-filter: blur(8px) saturate(120%);
-  padding: 20px 22px 26px 22px;
-  transition: border-color 320ms ease, box-shadow 320ms ease;
+  border-radius: var(--radius-card);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-hairline);
+  box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.02);
+  padding: 16px;
+  box-sizing: border-box;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  position: relative;
+
+  /* Dynamic mood accent assignments */
+  &[data-mood="happy"] { --mood-current: var(--mood-happy); }
+  &[data-mood="sad"] { --mood-current: var(--mood-sad); }
+  &[data-mood="surprised"] { --mood-current: var(--mood-surprised); }
+  &[data-mood="neutral"] { --mood-current: var(--mood-neutral); }
+  &[data-mood="detecting"] { --mood-current: var(--mood-detecting); }
 }
 
-/* Mood-reactive accent: the whole card's accent color follows whichever
-   mood is currently detected, instead of a fixed brand gradient. Each key
-   is set on the card via data-mood="..." from FaceExpression.jsx. */
-.expression-card[data-mood="happy"] { --mood-current: var(--mood-happy); }
-.expression-card[data-mood="sad"] { --mood-current: var(--mood-sad); }
-.expression-card[data-mood="surprised"] { --mood-current: var(--mood-surprised); }
-.expression-card[data-mood="neutral"] { --mood-current: var(--mood-neutral); }
-.expression-card[data-mood="detecting"] { --mood-current: var(--mood-detecting); }
-
-.expression-card {
-  border-color: color-mix(in srgb, var(--mood-current) 45%, rgba(255,255,255,0.06));
-  box-shadow: 0 30px 80px rgba(2,6,23,0.6), 0 0 0 1px color-mix(in srgb, var(--mood-current) 18%, transparent) inset;
-}
-
+/* Webcam viewport container */
 .video-wrap {
   position: relative;
   width: 100%;
   aspect-ratio: 4 / 3;
-  border-radius: 14px;
+  border-radius: 18px;
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(0,0,0,0.5), rgba(0,0,0,0.28));
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  background: #0d0f12;
+
+  .video-element {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+    display: block;
+  }
+
+  /* Refined lens frame accents */
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    pointer-events: none;
+  }
 }
 
-.video-wrap::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));
-}
-
-.video-element {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  background: #000;
-}
-
-/* status row — sits below the video instead of overlapping the face */
+/* Status row: strictly below video to keep face visible */
 .status-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
   margin-top: 16px;
-  padding: 0 2px;
-}
+  padding: 0 6px;
 
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--mood-current);
-  box-shadow: 0 0 0 0 color-mix(in srgb, var(--mood-current) 60%, transparent);
-}
+  .status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 9px;
 
-.status-dot.live {
-  animation: statusPulse 2200ms ease-out infinite;
-}
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--mood-current);
+      transition: background 0.3s ease;
 
-.status-label {
-  font-size: 15px;
-  font-weight: 600;
-  color: rgba(255,255,255,0.92);
-  text-transform: capitalize;
-  transition: color 240ms ease;
-}
+      &.live {
+        animation: studioDotPulse 2.4s infinite ease-out;
+      }
+    }
 
-.status-label.pulse {
-  color: var(--mood-current);
-}
+    .status-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      text-transform: capitalize;
+      letter-spacing: -0.01em;
 
-.live-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 500;
-  color: rgba(255,255,255,0.6);
-  margin-bottom: 14px;
-}
+      &.pulse {
+        color: var(--mood-current);
+      }
+    }
+  }
 
-@keyframes statusPulse {
-  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--mood-current) 55%, transparent); }
-  70% { box-shadow: 0 0 0 8px transparent; }
-  100% { box-shadow: 0 0 0 0 transparent; }
+  .status-badge {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    background: rgba(0, 0, 0, 0.04);
+    padding: 3px 8px;
+    border-radius: 6px;
+  }
 }
 
 .controls {
-  margin-top: 18px;
+  margin-top: 14px;
   width: 100%;
-  display: flex;
-  justify-content: center;
+
+  .btn-primary {
+    width: 100%;
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: 14px 24px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    font-family: var(--font-body);
+    color: #ffffff;
+    background: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      background: #000;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+  }
 }
 
-.btn-primary {
-  border: none;
-  border-radius: 999px;
-  padding: 0.85rem 1.6rem;
-  font-size: 1rem;
-  font-weight: 700;
-  color: #fff;
-  width: 100%;
-  background: color-mix(in srgb, var(--mood-current) 82%, #0a0b10);
-  cursor: pointer;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, background 320ms ease;
-  box-shadow: 0 12px 36px color-mix(in srgb, var(--mood-current) 22%, transparent);
-}
-
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-primary:not(:disabled):hover {
-  transform: translateY(-2px);
-  box-shadow: 0 18px 40px color-mix(in srgb, var(--mood-current) 28%, transparent);
-}
-
-@keyframes cardEntrance {
-  0% { transform: translateY(8px) scale(.996); opacity: 0 }
-  100% { transform: translateY(0) scale(1); opacity: 1 }
-}
-
-.decor-grid {
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px);
-  background-size: 56px 56px;
-  opacity: 0.03;
-  pointer-events: none;
-}
-
-.ef-nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 1100px;
-  margin: 0 auto 18px auto;
-  padding: 6px 6px;
-}
-
-.brand {
-  color: rgba(255,255,255,0.92);
-  font-weight: 800;
-  font-size: 18px;
-}
-
-.nav-btn {
-  border: 1px solid rgba(255,255,255,0.06);
-  transform: translateY(0);
-  opacity: 1;
-  transition: transform 520ms cubic-bezier(.2,.9,.2,1), opacity 520ms ease;
-}
-
-.hero-content { transform: translateY(18px); opacity: 0 }
-
-@media (max-width: 720px) {
-  .expression-hero-wrap { padding: 32px 16px 64px 16px; }
+@keyframes studioDotPulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--mood-current) 60%, transparent); }
+  70% { box-shadow: 0 0 0 8px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
 }
