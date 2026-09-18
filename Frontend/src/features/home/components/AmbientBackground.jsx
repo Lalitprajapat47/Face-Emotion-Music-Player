@@ -8,112 +8,113 @@ export default function AmbientBackground() {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
-    let animationFrameId;
-    let width = (canvas.width = window.innerWidth);
-    let height = (canvas.height = window.innerHeight);
+    let animId;
+    let w = (canvas.width = window.innerWidth);
+    let h = (canvas.height = window.innerHeight);
 
-    const handleResize = () => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+    const onResize = () => {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
     };
-    window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", onResize);
 
     let t = 0;
 
     const render = () => {
-      t += 0.006;
-      ctx.clearRect(0, 0, width, height);
+      t += 0.012;
+      ctx.clearRect(0, 0, w, h);
 
-      // Deep base studio gradient
-      const bgGrad = ctx.createRadialGradient(
-        width * 0.5,
-        height * 0.45,
-        50,
-        width * 0.5,
-        height * 0.5,
-        Math.max(width, height) * 0.8
-      );
-      bgGrad.addColorStop(0, "#0c0e14");
-      bgGrad.addColorStop(0.5, "#06070a");
-      bgGrad.addColorStop(1, "#030406");
-      ctx.fillStyle = bgGrad;
-      ctx.fillRect(0, 0, width, height);
+      // Deep Studio Pitch Black Base
+      ctx.fillStyle = "#040507";
+      ctx.fillRect(0, 0, w, h);
 
-      // Read dynamic CSS variable set by mood
-      const computedStyle = getComputedStyle(document.documentElement);
-      const moodColor = computedStyle.getPropertyValue("--mood-current").trim() || "#ff5e28";
+      const moodColor = getComputedStyle(document.documentElement)
+        .getPropertyValue("--mood-current")
+        .trim() || "#ff5e28";
 
-      // 1. Morphing Low-Frequency Wave Curves (Monochrome depth)
-      ctx.save();
-      ctx.filter = "blur(70px)";
-      for (let i = 0; i < 3; i++) {
-        const offset = i * 1.8;
-        const cx = width * (0.3 + 0.4 * Math.sin(t * 0.8 + offset));
-        const cy = height * (0.4 + 0.25 * Math.cos(t * 0.7 + offset));
-        const radius = Math.min(width, height) * (0.35 + 0.1 * Math.sin(t + offset));
-
-        const radGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
-        radGrad.addColorStop(0, i === 0 ? "rgba(220, 225, 240, 0.18)" : "rgba(30, 35, 48, 0.4)");
-        radGrad.addColorStop(0.8, "rgba(6, 7, 10, 0)");
-        ctx.fillStyle = radGrad;
-        ctx.beginPath();
-        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.restore();
-
-      // 2. Horizontal Anamorphic Prismatic Laser (Streak from Reference)
       ctx.save();
       ctx.globalCompositeOperation = "screen";
 
-      const flareY = height * 0.52 + Math.sin(t * 1.2) * 25;
-      const angle = -0.04 + Math.sin(t * 0.5) * 0.015;
+      // Multi-layer Apple/Google Siri-style morphing luminous ribbons
+      const ribbons = [
+        { amp: 45, freq: 0.0018, speed: 1.4, color: moodColor, blur: 50, alpha: 0.7 },
+        { amp: 65, freq: 0.0022, speed: -1.1, color: "#ec4899", blur: 40, alpha: 0.5 },
+        { amp: 35, freq: 0.003, speed: 1.8, color: "#38bdf8", blur: 30, alpha: 0.6 },
+        { amp: 20, freq: 0.0015, speed: -0.8, color: "#ffffff", blur: 12, alpha: 0.85 }
+      ];
 
-      ctx.translate(width * 0.5, flareY);
-      ctx.rotate(angle);
+      const centerY = h * 0.52;
 
-      // Outer diffused spectral envelope
-      const wideGlow = ctx.createLinearGradient(-width, 0, width, 0);
-      wideGlow.addColorStop(0, "rgba(0,0,0,0)");
-      wideGlow.addColorStop(0.25, moodColor);
-      wideGlow.addColorStop(0.5, "rgba(255, 255, 255, 0.95)");
-      wideGlow.addColorStop(0.72, "#ff0077");
-      wideGlow.addColorStop(1, "rgba(0,0,0,0)");
+      ribbons.forEach((ribbon, index) => {
+        ctx.save();
+        ctx.filter = `blur(${ribbon.blur}px)`;
+        ctx.globalAlpha = ribbon.alpha;
+        ctx.beginPath();
 
-      ctx.filter = "blur(35px)";
-      ctx.fillStyle = wideGlow;
-      ctx.fillRect(-width * 0.8, -45, width * 1.6, 90);
+        const step = 8;
+        let started = false;
 
-      // Sharp Core Needle Beam
-      const needleGlow = ctx.createLinearGradient(-width * 0.6, 0, width * 0.6, 0);
-      needleGlow.addColorStop(0, "rgba(0,0,0,0)");
-      needleGlow.addColorStop(0.35, moodColor);
-      needleGlow.addColorStop(0.5, "#ffffff");
-      needleGlow.addColorStop(0.65, "#ff3366");
-      needleGlow.addColorStop(1, "rgba(0,0,0,0)");
+        for (let x = -100; x <= w + 100; x += step) {
+          // Dynamic harmonic sine & cosine synthesis
+          const wave1 = Math.sin(x * ribbon.freq + t * ribbon.speed) * ribbon.amp;
+          const wave2 = Math.cos(x * (ribbon.freq * 1.6) - t * (ribbon.speed * 0.8)) * (ribbon.amp * 0.6);
+          const dynamicCenter = centerY + Math.sin(t * 0.6 + index) * 25;
+          const y = dynamicCenter + wave1 + wave2;
 
-      ctx.filter = "blur(6px)";
-      ctx.fillStyle = needleGlow;
-      ctx.fillRect(-width * 0.7, -4, width * 1.4, 8);
+          if (!started) {
+            ctx.moveTo(x, y);
+            started = true;
+          } else {
+            ctx.lineTo(x, y);
+          }
+        }
+
+        // Variable line thickness & gradient shading
+        ctx.strokeStyle = ribbon.color;
+        ctx.lineWidth = index === 3 ? 14 : 48;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.stroke();
+        ctx.restore();
+      });
+
+      // Central Luminescent Flare Core (Apple Glow Node)
+      const coreX = w * 0.52 + Math.sin(t * 0.9) * (w * 0.12);
+      const coreY = centerY + Math.cos(t * 1.1) * 20;
+      const coreRadius = Math.min(w, h) * 0.38;
+
+      const radialHalo = ctx.createRadialGradient(coreX, coreY, 0, coreX, coreY, coreRadius);
+      radialHalo.addColorStop(0, "rgba(255, 255, 255, 0.4)");
+      radialHalo.addColorStop(0.25, moodColor);
+      radialHalo.addColorStop(0.6, "rgba(236, 72, 153, 0.15)");
+      radialHalo.addColorStop(1, "rgba(0, 0, 0, 0)");
+
+      ctx.save();
+      ctx.filter = "blur(60px)";
+      ctx.fillStyle = radialHalo;
+      ctx.beginPath();
+      ctx.arc(coreX, coreY, coreRadius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
 
       ctx.restore();
 
-      animationFrameId = requestAnimationFrame(render);
+      animId = requestAnimationFrame(render);
     };
 
     render();
 
     return () => {
-      window.removeEventListener("resize", handleResize);
-      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener("resize", onResize);
+      cancelAnimationFrame(animId);
     };
   }, []);
 
   return (
     <div className="ambient-viewport" aria-hidden="true">
       <canvas ref={canvasRef} className="ambient-canvas" />
-      <div className="tactile-grain-screen" />
-      <div className="edge-vignette" />
+      <div className="tactile-frost-texture" />
+      <div className="vignette-radial" />
     </div>
   );
 }
