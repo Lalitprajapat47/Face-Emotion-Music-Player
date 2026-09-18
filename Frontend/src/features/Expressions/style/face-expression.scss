@@ -1,30 +1,51 @@
 .expression-card {
   width: 100%;
-  border-radius: var(--radius-card);
-  background: var(--bg-surface);
-  border: 1px solid var(--border-hairline);
-  box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.02);
+  max-width: 480px;
+  position: relative;
+  background: rgba(14, 16, 22, 0.72);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 16px;
   box-sizing: border-box;
-  transition: box-shadow 0.3s ease, border-color 0.3s ease;
-  position: relative;
+  box-shadow: 
+    0 30px 60px -15px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
 
-  /* Dynamic mood accent assignments */
+  /* Mood accent color variables */
   &[data-mood="happy"] { --mood-current: var(--mood-happy); }
   &[data-mood="sad"] { --mood-current: var(--mood-sad); }
   &[data-mood="surprised"] { --mood-current: var(--mood-surprised); }
   &[data-mood="neutral"] { --mood-current: var(--mood-neutral); }
   &[data-mood="detecting"] { --mood-current: var(--mood-detecting); }
+
+  .card-ambient-glow {
+    position: absolute;
+    inset: -1px;
+    border-radius: 23px;
+    background: linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--mood-current) 60%, transparent),
+      transparent 55%,
+      rgba(255, 255, 255, 0.05)
+    );
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.8;
+    transition: background 0.4s ease;
+  }
 }
 
-/* Webcam viewport container */
 .video-wrap {
   position: relative;
   width: 100%;
   aspect-ratio: 4 / 3;
-  border-radius: 18px;
+  border-radius: 16px;
   overflow: hidden;
-  background: #0d0f12;
+  background: #020305;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) inset;
 
   .video-element {
     width: 100%;
@@ -34,107 +55,185 @@
     display: block;
   }
 
-  /* Refined lens frame accents */
-  &::after {
-    content: "";
+  .reticle-marks {
     position: absolute;
     inset: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 10px;
     pointer-events: none;
+
+    .reticle {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-color: rgba(255, 255, 255, 0.35);
+      border-style: solid;
+
+      &.top-l { top: 0; left: 0; border-width: 1.5px 0 0 1.5px; }
+      &.top-r { top: 0; right: 0; border-width: 1.5px 1.5px 0 0; }
+      &.btm-l { bottom: 0; left: 0; border-width: 0 0 1.5px 1.5px; }
+      &.btm-r { bottom: 0; right: 0; border-width: 0 1.5px 1.5px 0; }
+    }
   }
 }
 
-/* Status row: strictly below video to keep face visible */
+/* Status Telemetry Row */
 .status-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-top: 16px;
-  padding: 0 6px;
+  padding: 0 4px;
 
-  .status-indicator {
+  .status-telemetry {
     display: flex;
     align-items: center;
-    gap: 9px;
+    gap: 12px;
 
     .status-dot {
-      width: 8px;
-      height: 8px;
+      width: 9px;
+      height: 9px;
       border-radius: 50%;
       background: var(--mood-current);
-      transition: background 0.3s ease;
+      box-shadow: 0 0 12px var(--mood-current);
+      transition: background 0.3s ease, box-shadow 0.3s ease;
 
       &.live {
-        animation: studioDotPulse 2.4s infinite ease-out;
+        animation: pulseLaserDot 2.2s infinite ease-out;
       }
     }
 
-    .status-label {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      text-transform: capitalize;
-      letter-spacing: -0.01em;
+    .status-labels {
+      display: flex;
+      flex-direction: column;
 
-      &.pulse {
-        color: var(--mood-current);
+      .sub-tag {
+        font-family: ui-monospace, SFMono-Regular, monospace;
+        font-size: 0.65rem;
+        letter-spacing: 0.08em;
+        color: rgba(255, 255, 255, 0.4);
+      }
+
+      .main-val {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #ffffff;
+        text-transform: capitalize;
+        transition: color 0.3s ease;
+
+        &.pulse {
+          color: var(--mood-current);
+        }
       }
     }
   }
 
-  .status-badge {
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 0.7rem;
-    color: var(--text-secondary);
-    background: rgba(0, 0, 0, 0.04);
-    padding: 3px 8px;
+  .system-pill {
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px 8px;
     border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
   }
 }
 
+/* THE KINETIC PRISMATIC BUTTON */
 .controls {
-  margin-top: 14px;
+  margin-top: 18px;
   width: 100%;
 
-  .btn-primary {
+  .btn-expression-trigger {
     width: 100%;
-    border: none;
-    border-radius: var(--radius-pill);
-    padding: 14px 24px;
-    font-size: 0.95rem;
-    font-weight: 700;
-    font-family: var(--font-body);
-    color: #ffffff;
-    background: var(--text-primary);
+    position: relative;
+    overflow: hidden;
+    padding: 16px 24px;
+    border-radius: 12px;
+    border: 1px solid color-mix(in srgb, var(--mood-current) 45%, rgba(255, 255, 255, 0.15));
+    background: rgba(20, 24, 34, 0.85);
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    box-shadow: 
+      0 12px 28px -6px rgba(0, 0, 0, 0.6),
+      0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.3s ease;
+
+    .btn-ambient-fill {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 100%, color-mix(in srgb, var(--mood-current) 25%, transparent), transparent 75%);
+      opacity: 0.6;
+      transition: opacity 0.3s ease;
+    }
+
+    .btn-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #ffffff;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+
+      .btn-icon {
+        font-size: 1.1rem;
+        color: var(--mood-current);
+        transition: color 0.3s ease;
+      }
+    }
+
+    /* Prismatic sweep laser shine across the button surface */
+    .btn-beam-shine {
+      position: absolute;
+      top: 0;
+      left: -120%;
+      width: 80%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.25),
+        transparent
+      );
+      transform: skewX(-25deg);
+      transition: left 0.75s ease-in-out;
+      pointer-events: none;
+    }
 
     &:hover:not(:disabled) {
       transform: translateY(-2px);
-      background: #000;
-      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+      border-color: var(--mood-current);
+      box-shadow: 
+        0 16px 36px -8px rgba(0, 0, 0, 0.8),
+        0 0 24px -4px color-mix(in srgb, var(--mood-current) 40%, transparent);
+
+      .btn-ambient-fill {
+        opacity: 1;
+      }
+
+      .btn-beam-shine {
+        left: 160%;
+      }
     }
 
     &:active:not(:disabled) {
-      transform: translateY(0);
+      transform: translateY(1px);
     }
 
     &:disabled {
-      opacity: 0.4;
+      opacity: 0.35;
       cursor: not-allowed;
-      transform: none;
+      border-color: rgba(255, 255, 255, 0.08);
+      box-shadow: none;
     }
   }
 }
 
-@keyframes studioDotPulse {
-  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--mood-current) 60%, transparent); }
-  70% { box-shadow: 0 0 0 8px transparent; }
+@keyframes pulseLaserDot {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--mood-current) 70%, transparent); }
+  70% { box-shadow: 0 0 0 9px transparent; }
   100% { box-shadow: 0 0 0 0 transparent; }
 }

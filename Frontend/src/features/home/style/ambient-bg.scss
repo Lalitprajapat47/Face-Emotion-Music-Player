@@ -6,169 +6,31 @@
   overflow: hidden;
   pointer-events: none;
   z-index: 0;
-  background: #08090d;
-}
+  background: #030406;
 
-/* --- Layer 1: Sculptural Monochromatic Curves --- */
-.topo-cluster {
-  position: absolute;
-  inset: -20%;
-  filter: blur(55px);
-  opacity: 0.85;
-
-  .mono-blob {
-    position: absolute;
-    border-radius: 50%;
-    will-change: transform;
-    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    animation-iteration-count: infinite;
-    animation-direction: alternate;
-  }
-
-  .mono-1 {
-    width: 70vw;
-    height: 45vh;
-    left: 10%;
-    top: 15%;
-    background: radial-gradient(ellipse at center, rgba(235, 238, 245, 0.45) 0%, rgba(20, 22, 28, 0.95) 75%);
-    animation: driftOne 24s ease-in-out infinite alternate;
-  }
-
-  .mono-2 {
-    width: 60vw;
-    height: 50vh;
-    right: 5%;
-    bottom: 10%;
-    background: radial-gradient(ellipse at center, rgba(160, 166, 180, 0.35) 0%, rgba(5, 6, 8, 0.98) 70%);
-    animation: driftTwo 28s ease-in-out infinite alternate;
-  }
-
-  .mono-3 {
-    width: 45vw;
-    height: 35vh;
-    left: 28%;
-    bottom: 25%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(10, 11, 14, 0) 80%);
-    animation: driftThree 20s ease-in-out infinite alternate;
-  }
-}
-
-/* --- Layer 2: Prismatic Laser & Horizontal Visor Flare --- */
-.prismatic-strip-container {
-  position: absolute;
-  top: 48%;
-  left: -20%;
-  width: 140%;
-  height: 120px;
-  transform: translateY(-50%) rotate(-2.5deg);
-  mix-blend-mode: screen;
-  will-change: transform, opacity;
-  animation: flareFloat 16s ease-in-out infinite;
-
-  /* Central intense core */
-  .optical-beam-core {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    height: 18px;
-    transform: translateY(-50%);
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      color-mix(in srgb, var(--mood-current) 40%, rgba(255, 90, 0, 0.8)) 20%,
-      #ffffff 50%,
-      color-mix(in srgb, var(--mood-current) 60%, rgba(255, 0, 128, 0.8)) 80%,
-      transparent 100%
-    );
-    filter: blur(6px);
-    opacity: 0.9;
-    transition: background 0.6s ease;
-  }
-
-  /* Wide horizontal streak blur */
-  .optical-flare-spread {
-    position: absolute;
-    top: 50%;
-    left: 5%;
-    right: 5%;
-    height: 54px;
-    transform: translateY(-50%);
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      var(--mood-current) 35%,
-      #fff4d6 50%,
-      rgba(255, 60, 160, 0.8) 65%,
-      transparent 100%
-    );
-    filter: blur(24px);
-    opacity: 0.85;
-    transition: background 0.6s ease;
-  }
-
-  /* Chromatic aberration edge */
-  .chromatic-ghost {
-    position: absolute;
-    top: calc(50% + 4px);
-    left: 10%;
-    right: 0;
-    height: 12px;
-    background: linear-gradient(90deg, transparent 0%, #38bdf8 30%, #a855f7 70%, transparent 100%);
-    filter: blur(14px);
-    opacity: 0.55;
-  }
-}
-
-/* --- Layer 3: Tactile Etched Glass Texture --- */
-.tactile-frost-shroud {
-  position: absolute;
-  inset: 0;
-  backdrop-filter: blur(28px) saturate(130%);
-  -webkit-backdrop-filter: blur(28px) saturate(130%);
-
-  .noise-surface {
+  .ambient-canvas {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
+    display: block;
+  }
+
+  /* Frosted tactile micro-grain overlay (SVG noise ki jagah lightweight CSS grain) */
+  .tactile-grain-screen {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 0);
+    background-size: 4px 4px;
+    opacity: 0.22;
     mix-blend-mode: overlay;
     pointer-events: none;
   }
-}
 
-/* Perimeter vignette for deep editorial contrast */
-.ambient-vignette {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(5, 6, 9, 0.7) 100%);
-}
-
-/* Organic morphing motion */
-@keyframes driftOne {
-  0% { transform: translate3d(0, 0, 0) scale(1); }
-  50% { transform: translate3d(40px, -30px, 0) scale(1.08) skewX(-2deg); }
-  100% { transform: translate3d(-30px, 20px, 0) scale(0.95); }
-}
-
-@keyframes driftTwo {
-  0% { transform: translate3d(0, 0, 0) scale(1.05); }
-  50% { transform: translate3d(-50px, -40px, 0) scale(0.92) skewY(2deg); }
-  100% { transform: translate3d(30px, 30px, 0) scale(1.03); }
-}
-
-@keyframes driftThree {
-  0% { transform: translate3d(0, 0, 0) rotate(0deg); }
-  100% { transform: translate3d(-30px, -20px, 0) rotate(8deg); }
-}
-
-@keyframes flareFloat {
-  0%, 100% {
-    transform: translateY(-50%) rotate(-2.5deg) scaleY(1);
-    opacity: 0.85;
-  }
-  50% {
-    transform: translateY(calc(-50% + 24px)) rotate(-1.5deg) scaleY(1.18);
-    opacity: 1;
+  .edge-vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, transparent 40%, rgba(2, 3, 5, 0.85) 100%);
+    pointer-events: none;
   }
 }

@@ -7,74 +7,34 @@
 }
 
 :root {
-  /* Studio Minimal Canvas Tokens */
-  --bg-main: #f4f5f8;
-  --bg-surface: #ffffff;
-  --bg-surface-subtle: rgba(255, 255, 255, 0.7);
-  --border-hairline: rgba(0, 0, 0, 0.08);
-  --border-strong: rgba(0, 0, 0, 0.16);
+  --bg-primary: #050608;
+  --text-main: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.65);
 
-  --text-primary: #0a0c10;
-  --text-secondary: #575e6d;
-  --text-muted: #8b92a4;
-
-  /* Mood palette inspired by the warm editorial tones */
-  --mood-happy: #ff5e28;     /* Rich vivid amber-orange from reference image */
-  --mood-sad: #2563eb;       /* Studio cerulean */
-  --mood-surprised: #7c3aed; /* Deep electric violet */
-  --mood-neutral: #52525b;   /* Architectural graphite */
-  --mood-detecting: #71717a;
+  /* Precise Vivid Prismatic Tones */
+  --mood-happy: #ff601c;     /* Luminous hot amber */
+  --mood-sad: #3b82f6;       /* Hyper blue */
+  --mood-surprised: #d946ef; /* Spectral magenta */
+  --mood-neutral: #94a3b8;   /* Cool mercury */
+  --mood-detecting: #64748b;
   --mood-current: var(--mood-happy);
 
   --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  --radius-card: 24px;
-  --radius-pill: 999px;
 }
 
 html, body, #root {
-  min-height: 100%;
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+  color: var(--text-main);
   font-family: var(--font-body);
-  background-color: var(--bg-main);
-  color: var(--text-primary);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Atmosphere gradient overlay reacting dynamically to detected mood */
-body {
-  position: relative;
   overflow-x: hidden;
-
-  &::before {
-    content: "";
-    position: fixed;
-    bottom: -15vw;
-    right: -10vw;
-    width: 65vw;
-    height: 65vw;
-    max-width: 900px;
-    max-height: 900px;
-    border-radius: 50%;
-    background: radial-gradient(circle, color-mix(in srgb, var(--mood-current) 65%, transparent) 0%, rgba(255, 255, 255, 0) 72%);
-    filter: blur(90px);
-    opacity: 0.65;
-    pointer-events: none;
-    z-index: 0;
-    transition: background 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
-  }
 }
 
 .site-container {
+  position: relative;
+  z-index: 2;
   max-width: 1240px;
   margin: 0 auto;
-  padding: 40px 28px;
-  position: relative;
-  z-index: 1;
-}
-
-h1, h2, h3 {
-  font-family: var(--font-display);
-  color: var(--text-primary);
-  letter-spacing: -0.03em;
+  padding: 32px 24px;
 }

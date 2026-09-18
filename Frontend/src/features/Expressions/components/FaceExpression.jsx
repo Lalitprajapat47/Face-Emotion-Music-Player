@@ -11,6 +11,7 @@ export default function FaceExpression({ onClick = () => {}, compact = false }) 
   const [badgePulse, setBadgePulse] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [initStatus, setInitStatus] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   const rafRef = useRef(null);
 
   useEffect(() => {
@@ -21,7 +22,7 @@ export default function FaceExpression({ onClick = () => {}, compact = false }) 
       if (mountedFlag) {
         setInitStatus(status);
         if (!status.ok) {
-          setExpression(status.error?.message || "Initialization failed");
+          setExpression(status.error?.message || "Sensor Offline");
         }
         setMounted(true);
       }
@@ -57,52 +58,78 @@ export default function FaceExpression({ onClick = () => {}, compact = false }) 
   }, [initStatus]);
 
   async function handleClick() {
+    setIsProcessing(true);
     const detectedExpr = detect({ landmarkerRef, videoRef, setExpression });
     onClick(detectedExpr);
+    setTimeout(() => setIsProcessing(false), 500);
   }
 
   useEffect(() => {
     if (!expression) return;
     setBadgePulse(true);
-    const t = setTimeout(() => setBadgePulse(false), 650);
+    const t = setTimeout(() => setBadgePulse(false), 600);
     return () => clearTimeout(t);
   }, [expression]);
 
   const KNOWN_MOODS = ["happy", "sad", "surprised", "neutral"];
-  const moodKey = KNOWN_MOODS.includes(expression?.toLowerCase())
-    ? expression.toLowerCase()
-    : "detecting";
+  const currentClean = expression?.toLowerCase().trim();
+  const moodKey = KNOWN_MOODS.includes(currentClean) ? currentClean : "detecting";
   const isLive = Boolean(initStatus?.ok);
 
-  // Sync the root mood-current variable with detected emotion for global aura
+  // Sync global CSS variable for backdrop canvas laser sync
   useEffect(() => {
-    if (KNOWN_MOODS.includes(expression?.toLowerCase())) {
+    if (KNOWN_MOODS.includes(moodKey)) {
       document.documentElement.style.setProperty(
         "--mood-current",
-        `var(--mood-${expression.toLowerCase()})`
+        `var(--mood-${moodKey})`
       );
     }
-  }, [expression]);
+  }, [moodKey]);
 
   const cardMarkup = (
     <div className="expression-card" data-mood={moodKey}>
+      {/* Dynamic Laser Border Contour */}
+      <div className="card-ambient-glow" />
+
       <div className="video-wrap">
         <video ref={videoRef} className="video-element" playsInline autoPlay muted />
-      </div>
-
-      <div className="status-row" aria-live="polite">
-        <div className="status-indicator">
-          <span className={`status-dot ${isLive ? "live" : ""}`} />
-          <span className={`status-label ${badgePulse ? "pulse" : ""}`}>
-            {expression}
-          </span>
+        
+        {/* Subtle Architectural Lens Guides */}
+        <div className="reticle-marks">
+          <span className="reticle top-l" />
+          <span className="reticle top-r" />
+          <span className="reticle btm-l" />
+          <span className="reticle btm-r" />
         </div>
-        <span className="status-badge">MediaPipe v0.10</span>
       </div>
 
+      {/* Telemetry Row Strictly Below Video */}
+      <div className="status-row">
+        <div className="status-telemetry">
+          <span className={`status-dot ${isLive ? "live" : ""}`} />
+          <div className="status-labels">
+            <span className="sub-tag">EXPRESSION</span>
+            <span className={`main-val ${badgePulse ? "pulse" : ""}`}>
+              {expression}
+            </span>
+          </div>
+        </div>
+        <span className="system-pill">MediaPipe v0.10</span>
+      </div>
+
+      {/* High-Aesthetic Prismatic Trigger Button */}
       <div className="controls">
-        <button className="btn-primary" onClick={handleClick} disabled={!isLive}>
-          Detect expression
+        <button
+          className={`btn-expression-trigger ${isProcessing ? "processing" : ""}`}
+          onClick={handleClick}
+          disabled={!isLive}
+        >
+          <div className="btn-ambient-fill" />
+          <span className="btn-content">
+            <span className="btn-icon">⚡</span>
+            {isProcessing ? "Synthesizing..." : "Detect Expression"}
+          </span>
+          <div className="btn-beam-shine" />
         </button>
       </div>
     </div>
