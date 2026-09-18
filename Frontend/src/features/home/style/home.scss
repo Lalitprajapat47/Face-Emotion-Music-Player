@@ -1,414 +1,73 @@
-.moodify-dashboard {
-  min-height: 100vh;
-  position: relative;
-  background: #060608;
-  color: #f3f4f6;
-  padding-bottom: 120px;
-  overflow: hidden;
+.neon-hero{
+  padding: 56px 24px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 48px;
+}
 
-  /* Central Warm Spotlight Effect */
-  &::before {
-    content: "";
-    position: absolute;
-    top: -120px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 720px;
-    height: 480px;
-    background: radial-gradient(circle, rgba(245, 158, 86, 0.22) 0%, rgba(245, 158, 86, 0.05) 55%, transparent 75%);
-    pointer-events: none;
-    z-index: 1;
-  }
+.hero-left{
+  flex:1;
+  max-width:520px;
+}
 
-  /* Thin Background Blueprint Grid Lines */
-  .grid-background-overlay {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 1200px;
-    height: 600px;
-    pointer-events: none;
-    z-index: 1;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    border-left: 1px solid rgba(255, 255, 255, 0.04);
-    border-right: 1px solid rgba(255, 255, 255, 0.04);
+.eyebrow{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.6);
+  margin: 0 0 16px 0;
+}
 
-    .grid-col {
-      border-right: 1px solid rgba(255, 255, 255, 0.04);
-      position: relative;
+.eyebrow-dot{
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--mood-detecting);
+  box-shadow: 0 0 0 0 rgba(111,118,132,0.5);
+  animation: eyebrowPulse 2200ms ease-out infinite;
+}
 
-      &::after {
-        content: "+";
-        position: absolute;
-        bottom: 25%;
-        right: -5px;
-        color: rgba(255, 255, 255, 0.2);
-        font-size: 11px;
-        font-family: monospace;
-      }
-    }
-  }
+@keyframes eyebrowPulse{
+  0% { box-shadow: 0 0 0 0 rgba(111,118,132,0.5); }
+  70% { box-shadow: 0 0 0 7px rgba(111,118,132,0); }
+  100% { box-shadow: 0 0 0 0 rgba(111,118,132,0); }
+}
 
-  /* Navigation Bar */
-  .dashboard-nav {
-    position: relative;
-    z-index: 10;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    max-width: 1240px;
-    margin: 0 auto;
-    padding: 1.5rem 2rem;
+.hero-title{
+  font-family: var(--font-display);
+  font-size: 44px;
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  color:#fff;
+  margin:0 0 14px 0;
+}
 
-    .brand-logo {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
+.hero-right{
+  width: 400px;
+  flex-shrink: 0;
+  display:flex;
+  justify-content:flex-end;
+}
 
-      .brand-icon-box {
-        width: 38px;
-        height: 38px;
-        background: #111215;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+/* the compact card embedded on Home carries its own mood-reactive border
+   and shadow (see face-expression.scss) — no extra wrapper card here, so
+   we avoid a card-inside-a-card look */
+.expression-card-compact{
+  width: 100%;
+}
 
-        svg {
-          width: 18px;
-          height: 18px;
-          color: #fcd34d;
-        }
-      }
+.expression-card-compact .expression-card{
+  max-width: none;
+  width: 100%;
+}
 
-      h2 {
-        font-size: 1.25rem;
-        font-weight: 700;
-        letter-spacing: -0.02em;
-        color: #fff;
-
-        span {
-          color: #f59e0b;
-        }
-      }
-    }
-
-    .nav-actions {
-      display: flex;
-      align-items: center;
-      gap: 1.25rem;
-
-      .user-profile {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.07);
-        padding: 0.35rem 0.8rem;
-        border-radius: 999px;
-
-        .username {
-          font-size: 0.82rem;
-          font-weight: 600;
-          color: #e5e7eb;
-        }
-
-        .logout-btn {
-          background: transparent;
-          border: none;
-          color: #9ca3af;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          transition: color 0.2s;
-
-          &:hover {
-            color: #ef4444;
-          }
-        }
-      }
-    }
-  }
-
-  /* Hero Presentation (Syncly style) */
-  .hero-syncly-section {
-    position: relative;
-    z-index: 10;
-    text-align: center;
-    max-width: 800px;
-    margin: 2rem auto 3.5rem;
-    padding: 0 1.5rem;
-
-    .ai-pill-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 0.35rem 0.9rem;
-      border-radius: 999px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: #e5e7eb;
-      margin-bottom: 1.5rem;
-
-      span.sparkle {
-        color: #f59e0b;
-      }
-    }
-
-    .hero-main-heading {
-      font-size: 4.8rem;
-      font-weight: 800;
-      letter-spacing: -0.04em;
-      line-height: 1;
-      margin-bottom: 1.25rem;
-      background: linear-gradient(180deg, #ffffff 40%, #fbd5b5 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-
-      @media (max-width: 768px) {
-        font-size: 3rem;
-      }
-    }
-
-    .hero-sub-description {
-      font-size: 1.05rem;
-      line-height: 1.6;
-      color: #9ca3af;
-      max-width: 540px;
-      margin: 0 auto 2rem;
-      font-weight: 400;
-    }
-
-    .mood-filter-tabs {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-
-      .mood-tab {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.07);
-        color: #9ca3af;
-        padding: 0.4rem 1.1rem;
-        border-radius: 999px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s ease;
-
-        &:hover {
-          color: #fff;
-          border-color: rgba(255, 255, 255, 0.15);
-        }
-
-        &.active {
-          background: #f59e0b;
-          border-color: #f59e0b;
-          color: #060608;
-          font-weight: 700;
-          box-shadow: 0 0 20px rgba(245, 158, 11, 0.35);
-        }
-      }
-    }
-  }
-
-  /* Main Workspace Dashboard Canvas */
-  .dashboard-core-wrapper {
-    position: relative;
-    z-index: 10;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 1.5rem;
-
-    /* Floating Pill Badges from the Image */
-    .floating-pill {
-      position: absolute;
-      background: #ffffff;
-      color: #0d0f17;
-      font-size: 0.72rem;
-      font-weight: 700;
-      padding: 0.35rem 0.85rem;
-      border-radius: 999px;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
-      z-index: 20;
-
-      &.pill-left {
-        top: -15px;
-        left: 60px;
-      }
-
-      &.pill-right {
-        top: 40px;
-        right: 0px;
-      }
-
-      .pill-icon {
-        width: 10px;
-        height: 10px;
-        background: #f59e0b;
-        border-radius: 2px;
-      }
-    }
-
-    .master-console-card {
-      background: #0f1013;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 24px;
-      box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.9);
-      padding: 2rem;
-      display: grid;
-      grid-template-columns: 1fr 380px;
-      gap: 2rem;
-
-      @media (max-width: 1024px) {
-        grid-template-columns: 1fr;
-      }
-
-      /* Console Track Section */
-      .tracks-pane {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-
-        .pane-top-bar {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding-bottom: 1rem;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-
-          .pane-title {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-
-            h3 {
-              font-size: 1rem;
-              font-weight: 600;
-              color: #fff;
-            }
-
-            .count-tag {
-              background: rgba(255, 255, 255, 0.06);
-              color: #9ca3af;
-              font-size: 0.72rem;
-              font-weight: 700;
-              padding: 0.15rem 0.5rem;
-              border-radius: 6px;
-            }
-          }
-
-          .detected-pill {
-            background: rgba(245, 158, 11, 0.1);
-            border: 1px solid rgba(245, 158, 11, 0.25);
-            color: #fcd34d;
-            font-size: 0.75rem;
-            font-weight: 600;
-            padding: 0.25rem 0.75rem;
-            border-radius: 999px;
-            text-transform: capitalize;
-          }
-        }
-
-        .tracks-table {
-          display: flex;
-          flex-direction: column;
-          gap: 0.35rem;
-
-          .track-row {
-            display: grid;
-            grid-template-columns: 35px 1fr 110px 45px;
-            align-items: center;
-            padding: 0.85rem 1rem;
-            border-radius: 12px;
-            background: #14151a;
-            border: 1px solid rgba(255, 255, 255, 0.03);
-            cursor: pointer;
-            transition: all 0.2s ease;
-
-            &:hover {
-              background: #1a1c23;
-              border-color: rgba(255, 255, 255, 0.08);
-            }
-
-            &.is-active {
-              background: rgba(245, 158, 11, 0.08);
-              border-color: rgba(245, 158, 11, 0.3);
-
-              .track-title {
-                color: #fcd34d;
-              }
-            }
-
-            .track-num {
-              font-size: 0.8rem;
-              color: #6b7280;
-              font-weight: 600;
-            }
-
-            .track-meta {
-              display: flex;
-              flex-direction: column;
-              gap: 0.15rem;
-
-              .track-title {
-                font-size: 0.9rem;
-                font-weight: 600;
-                color: #f3f4f6;
-              }
-
-              .track-artist {
-                font-size: 0.78rem;
-                color: #6b7280;
-              }
-            }
-
-            .track-mood {
-              font-size: 0.72rem;
-              text-transform: uppercase;
-              letter-spacing: 0.05em;
-              font-weight: 700;
-              color: #f59e0b;
-            }
-
-            .track-play-trigger {
-              background: transparent;
-              border: none;
-              color: #9ca3af;
-              cursor: pointer;
-              display: flex;
-              justify-content: flex-end;
-
-              &:hover {
-                color: #fff;
-              }
-            }
-          }
-
-          .empty-tracks-placeholder {
-            padding: 3.5rem 1rem;
-            text-align: center;
-            color: #6b7280;
-            font-size: 0.88rem;
-          }
-        }
-      }
-
-      /* Console Scanner Sidebar */
-      .scanner-pane {
-        display: flex;
-        flex-direction: column;
-      }
-    }
-  }
+@media (max-width:900px){
+  .neon-hero{flex-direction:column;gap:32px}
+  .hero-right{width:100%;max-width:420px;justify-content:center}
+  .hero-left{max-width:100%;text-align:center}
+  .eyebrow{justify-content:center}
 }
