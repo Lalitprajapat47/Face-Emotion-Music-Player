@@ -114,7 +114,7 @@ export default function FaceExpression({ onClick = () => {}, compact = false }) 
             </span>
           </div>
         </div>
-        <span className="system-pill">MediaPipe v0.10</span>
+        <span className="system-pill">MediaPipe v1.0</span>
       </div>
 
       {/* High-Aesthetic Prismatic Trigger Button */}
