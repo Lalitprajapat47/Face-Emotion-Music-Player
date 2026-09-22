@@ -1,6 +1,20 @@
 import React, { useEffect, useRef } from "react";
 import "../style/ambient-bg.scss";
 
+// Canvas 2D's fillStyle/strokeStyle cannot resolve CSS var() references —
+// it needs an actual color string. So instead of reading --mood-current via
+// getComputedStyle (which may return the raw "var(--mood-happy)" token
+// rather than a resolved color, depending on the browser), we keep a real
+// JS color map here and read the mood key straight off the DOM attribute
+// that FaceExpression.jsx already sets.
+const MOOD_HEX = {
+  happy: "#ff601c",
+  sad: "#3b82f6",
+  surprised: "#d946ef",
+  neutral: "#94a3b8",
+  detecting: "#64748b",
+};
+
 export default function AmbientBackground() {
   const canvasRef = useRef(null);
 
@@ -9,6 +23,7 @@ export default function AmbientBackground() {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     let animId;
+    let paused = document.hidden;
     let w = (canvas.width = window.innerWidth);
     let h = (canvas.height = window.innerHeight);
 
@@ -18,19 +33,35 @@ export default function AmbientBackground() {
     };
     window.addEventListener("resize", onResize);
 
+    // Pause the animation while the tab isn't visible — a full-viewport
+    // blurred canvas running forever in a background tab is pure wasted
+    // battery/CPU.
+    const onVisibility = () => {
+      paused = document.hidden;
+      if (!paused) render();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
+    const reduceMotion = window.matchMedia?.(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
     let t = 0;
 
     const render = () => {
-      t += 0.012;
+      if (paused) return;
+      t += reduceMotion ? 0.002 : 0.012;
       ctx.clearRect(0, 0, w, h);
 
       // Deep Studio Pitch Black Base
       ctx.fillStyle = "#040507";
       ctx.fillRect(0, 0, w, h);
 
-      const moodColor = getComputedStyle(document.documentElement)
-        .getPropertyValue("--mood-current")
-        .trim() || "#ff5e28";
+      const moodKey =
+        document
+          .querySelector(".expression-card")
+          ?.getAttribute("data-mood") || "detecting";
+      const moodColor = MOOD_HEX[moodKey] || MOOD_HEX.detecting;
 
       ctx.save();
       ctx.globalCompositeOperation = "screen";
@@ -102,10 +133,11 @@ export default function AmbientBackground() {
       animId = requestAnimationFrame(render);
     };
 
-    render();
+    if (!paused) render();
 
     return () => {
       window.removeEventListener("resize", onResize);
+      document.removeEventListener("visibilitychange", onVisibility);
       cancelAnimationFrame(animId);
     };
   }, []);
