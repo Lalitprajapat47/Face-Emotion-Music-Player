@@ -66,12 +66,15 @@ export default function AmbientBackground() {
       ctx.save();
       ctx.globalCompositeOperation = "screen";
 
-      // Multi-layer Apple/Google Siri-style morphing luminous ribbons
+      // Multi-layer Apple/Google Siri-style morphing luminous ribbons —
+      // kept subtle: no central round flare blob (that was the "gola jesa
+      // glow" the user asked to remove), and lower blur/alpha so it reads
+      // as gentle ambient motion instead of a bright streak.
       const ribbons = [
-        { amp: 45, freq: 0.0018, speed: 1.4, color: moodColor, blur: 50, alpha: 0.7 },
-        { amp: 65, freq: 0.0022, speed: -1.1, color: "#ec4899", blur: 40, alpha: 0.5 },
-        { amp: 35, freq: 0.003, speed: 1.8, color: "#38bdf8", blur: 30, alpha: 0.6 },
-        { amp: 20, freq: 0.0015, speed: -0.8, color: "#ffffff", blur: 12, alpha: 0.85 }
+        { amp: 45, freq: 0.0018, speed: 1.4, color: moodColor, blur: 36, alpha: 0.28 },
+        { amp: 65, freq: 0.0022, speed: -1.1, color: "#ec4899", blur: 30, alpha: 0.18 },
+        { amp: 35, freq: 0.003, speed: 1.8, color: "#38bdf8", blur: 24, alpha: 0.2 },
+        { amp: 20, freq: 0.0015, speed: -0.8, color: "#ffffff", blur: 10, alpha: 0.3 }
       ];
 
       const centerY = h * 0.52;
@@ -108,25 +111,6 @@ export default function AmbientBackground() {
         ctx.stroke();
         ctx.restore();
       });
-
-      // Central Luminescent Flare Core (Apple Glow Node)
-      const coreX = w * 0.52 + Math.sin(t * 0.9) * (w * 0.12);
-      const coreY = centerY + Math.cos(t * 1.1) * 20;
-      const coreRadius = Math.min(w, h) * 0.38;
-
-      const radialHalo = ctx.createRadialGradient(coreX, coreY, 0, coreX, coreY, coreRadius);
-      radialHalo.addColorStop(0, "rgba(255, 255, 255, 0.4)");
-      radialHalo.addColorStop(0.25, moodColor);
-      radialHalo.addColorStop(0.6, "rgba(236, 72, 153, 0.15)");
-      radialHalo.addColorStop(1, "rgba(0, 0, 0, 0)");
-
-      ctx.save();
-      ctx.filter = "blur(60px)";
-      ctx.fillStyle = radialHalo;
-      ctx.beginPath();
-      ctx.arc(coreX, coreY, coreRadius, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
 
       ctx.restore();
 
