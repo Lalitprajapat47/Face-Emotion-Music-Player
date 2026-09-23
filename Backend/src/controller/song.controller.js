@@ -52,5 +52,20 @@ async function getSong(req, res) {
 
 }
 
+async function getSongList(req, res) {
 
-module.exports = { uploadSong, getSong }
+    const { mood } = req.query
+
+    const songs = await songModel.find({
+        mood,
+    }).limit(20)
+
+    res.status(200).json({
+        message: "songs fetched successfully.",
+        songs,
+    })
+
+}
+
+
+module.exports = { uploadSong, getSong, getSongList }
