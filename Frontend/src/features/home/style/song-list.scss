@@ -1,0 +1,82 @@
+.song-list {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px 28px 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.song-list__title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin: 0 0 12px 2px;
+}
+
+.song-list__row {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+}
+
+.song-list__card {
+  flex: 0 0 auto;
+  width: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-hairline);
+  border-radius: 12px;
+  padding: 8px;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 200ms ease, transform 160ms ease;
+  text-align: left;
+}
+
+.song-list__card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--mood-current) 45%, var(--border-hairline));
+}
+
+.song-list__card.active {
+  border-color: var(--mood-current);
+}
+
+.song-list__poster {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #10131a;
+  display: block;
+}
+
+.song-list__name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.song-list__playing-dot {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mood-current);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.5);
+}
+
+@media (max-width: 900px) {
+  .song-list {
+    padding: 0 16px 24px 16px;
+  }
+}
