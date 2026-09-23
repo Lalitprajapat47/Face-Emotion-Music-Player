@@ -31,11 +31,12 @@
     pointer-events: none;
   }
 
-  /* Heavy cinematic vignette keeping focus on hero text & webcam */
+  /* Soft vignette keeping focus on hero text & webcam, without crushing
+     the overall brightness of the page */
   .vignette-radial {
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at 50% 50%, transparent 30%, rgba(3, 4, 7, 0.82) 100%);
+    background: radial-gradient(circle at 50% 45%, transparent 42%, rgba(3, 4, 7, 0.45) 100%);
     pointer-events: none;
   }
 }
