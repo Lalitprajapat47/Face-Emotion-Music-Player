@@ -1,12 +1,20 @@
 import React from 'react';
 import FaceExpression from '../../Expressions/components/FaceExpression';
 import Player from '../components/Player';
+import SongList from '../components/SongList';
 import AmbientBackground from '../components/AmbientBackground';
 import { useSong } from '../hooks/useSong';
 import '../style/home.scss';
 
 const Home = () => {
-  const { handleGetSong } = useSong();
+  const { handleGetSong, handleGetSongList } = useSong();
+
+  const handleExpressionDetected = (expression) => {
+    // Default behaviour, unchanged: fetch + auto-play one matching song.
+    handleGetSong({ mood: expression });
+    // Additional: also fetch the full list so the user can browse others.
+    handleGetSongList({ mood: expression });
+  };
 
   return (
     <>
@@ -27,16 +35,12 @@ const Home = () => {
           </div>
 
           <div className="hero-right">
-            <FaceExpression
-              compact
-              onClick={(expression) => {
-                handleGetSong({ mood: expression });
-              }}
-            />
+            <FaceExpression compact onClick={handleExpressionDetected} />
           </div>
         </section>
 
         <Player />
+        <SongList />
       </div>
     </>
   );
