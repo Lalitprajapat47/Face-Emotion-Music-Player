@@ -13,3 +13,8 @@ export async function getSong({ mood }) {
     const response = await api.get(`/api/songs?mood=${encodeURIComponent(mood)}`)
     return response.data
 }
+
+export async function getSongList({ mood }) {
+    const response = await api.get(`/api/songs/list?mood=${encodeURIComponent(mood)}`)
+    return response.data
+}
