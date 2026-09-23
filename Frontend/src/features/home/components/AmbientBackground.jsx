@@ -71,10 +71,10 @@ export default function AmbientBackground() {
       // glow" the user asked to remove), and lower blur/alpha so it reads
       // as gentle ambient motion instead of a bright streak.
       const ribbons = [
-        { amp: 45, freq: 0.0018, speed: 1.4, color: moodColor, blur: 36, alpha: 0.28 },
-        { amp: 65, freq: 0.0022, speed: -1.1, color: "#ec4899", blur: 30, alpha: 0.18 },
-        { amp: 35, freq: 0.003, speed: 1.8, color: "#38bdf8", blur: 24, alpha: 0.2 },
-        { amp: 20, freq: 0.0015, speed: -0.8, color: "#ffffff", blur: 10, alpha: 0.3 }
+        { amp: 45, freq: 0.0018, speed: 1.4, color: moodColor, blur: 40, alpha: 0.48 },
+        { amp: 65, freq: 0.0022, speed: -1.1, color: "#ec4899", blur: 34, alpha: 0.3 },
+        { amp: 35, freq: 0.003, speed: 1.8, color: "#38bdf8", blur: 28, alpha: 0.32 },
+        { amp: 20, freq: 0.0015, speed: -0.8, color: "#ffffff", blur: 11, alpha: 0.45 }
       ];
 
       const centerY = h * 0.52;
