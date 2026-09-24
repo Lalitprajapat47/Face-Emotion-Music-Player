@@ -1,9 +1,10 @@
 .home-hero {
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - 80px);
-  justify-content: space-between;
-  gap: 60px;
+  gap: 48px;
+  /* Player is position: fixed at the bottom, so it takes no space in this
+     flow — pad the bottom manually so content never sits underneath it. */
+  padding-bottom: 140px;
 }
 
 .neon-hero {
