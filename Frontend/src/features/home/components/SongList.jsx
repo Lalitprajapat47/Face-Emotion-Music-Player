@@ -11,7 +11,13 @@ const SongList = () => {
 
   return (
     <section className="song-list" aria-label="More songs for this mood">
-      <p className="song-list__title">More for this mood</p>
+      <div className="song-list__header">
+        <div>
+          <p className="song-list__eyebrow">Recommended</p>
+          <h2 className="song-list__title">More for this mood</h2>
+        </div>
+        <span className="song-list__count">{songList.length} tracks</span>
+      </div>
       <div className="song-list__row">
         {songList.map((item) => {
           const isActive = item._id ? item._id === song?._id : item.url === song?.url;
