@@ -22,14 +22,21 @@ const SongList = () => {
               onClick={() => playSong(item)}
               type="button"
             >
-              <img
-                className="song-list__poster"
-                src={item.posterUrl}
-                alt=""
-                loading="lazy"
-              />
-              <span className="song-list__name">{item.title}</span>
-              {isActive && <span className="song-list__playing-dot" aria-hidden="true" />}
+              <div className="song-list__art">
+                <img
+                  className="song-list__poster"
+                  src={item.posterUrl}
+                  alt=""
+                  loading="lazy"
+                />
+                <span className="song-list__play-icon" aria-hidden="true">
+                  {isActive ? '❚❚' : '▶'}
+                </span>
+              </div>
+              <div className="song-list__meta">
+                <span className="song-list__name">{item.title}</span>
+                {item.mood && <span className="song-list__mood">{item.mood}</span>}
+              </div>
             </button>
           );
         })}
