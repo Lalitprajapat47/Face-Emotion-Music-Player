@@ -19,7 +19,7 @@ const SongList = () => {
         <span className="song-list__count">{songList.length} tracks</span>
       </div>
       <div className="song-list__row">
-        {songList.map((item) => {
+        {songList.map((item, index) => {
           const isActive = item._id ? item._id === song?._id : item.url === song?.url;
           return (
             <button
@@ -27,7 +27,9 @@ const SongList = () => {
               className={`song-list__card ${isActive ? 'active' : ''}`}
               onClick={() => playSong(item)}
               type="button"
+              style={{ '--i': index % 2 === 0 ? -1 : 1 }}
             >
+              <span className="song-list__vinyl-peek" aria-hidden="true" />
               <div className="song-list__art">
                 <img
                   className="song-list__poster"

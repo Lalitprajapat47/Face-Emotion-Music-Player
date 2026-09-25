@@ -1,82 +1,95 @@
-.home-hero {
+.studio {
   display: flex;
   flex-direction: column;
-  gap: 48px;
+  align-items: center;
+  gap: 8px;
   /* Player is position: fixed at the bottom, so it takes no space in this
      flow — pad the bottom manually so content never sits underneath it. */
   padding-bottom: 140px;
+  padding-top: 24px;
 }
 
-.neon-hero {
+.studio__brand {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 56px;
-  padding: 40px 0 20px;
-
-  @media (max-width: 960px) {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 40px;
-  }
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
 }
 
-.hero-left {
-  flex: 1;
-  max-width: 580px;
-
-  .eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-secondary);
-    margin-bottom: 20px;
-
-    .eyebrow-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--mood-current);
-      transition: background 0.3s ease;
-    }
-  }
-
-  .hero-title {
-    font-size: clamp(2.6rem, 5vw, 4.4rem);
-    font-weight: 800;
-    line-height: 1.02;
-    margin-bottom: 24px;
-    color: var(--text-primary);
-
-    .faded {
-      color: var(--text-muted);
-      display: block;
-      font-weight: 700;
-    }
-  }
-
-  .lead {
-    font-size: 1.05rem;
-    line-height: 1.6;
-    color: var(--text-secondary);
-    max-width: 480px;
-  }
+.studio__brand-mark {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mood-current);
+  transition: background 320ms ease;
 }
 
-.hero-right {
-  width: 440px;
-  flex-shrink: 0;
-
-  @media (max-width: 960px) {
-    width: 100%;
-    max-width: 480px;
-  }
-}
-
-.expression-card-compact {
+.studio__stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   width: 100%;
+  padding: 8px 24px 32px;
+}
+
+.studio__tagline {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: center;
+  letter-spacing: -0.01em;
+  max-width: 420px;
+  margin: 0 0 22px;
+}
+
+@media (max-width: 640px) {
+  .studio__tagline { font-size: 19px; }
+}
+
+/* Signal line — a thin glowing wire connecting camera -> mood readout ->
+   song output, with a dot animating the flow of "signal" through it. */
+.signal-line {
+  position: relative;
+  width: 2px;
+  height: 34px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    color-mix(in srgb, var(--mood-current) 55%, transparent),
+    transparent
+  );
+}
+
+.signal-line__pulse {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--mood-current);
+  transform: translateX(-50%);
+  box-shadow: 0 0 8px 1px color-mix(in srgb, var(--mood-current) 70%, transparent);
+  animation: signalFlow 1.8s ease-in-out infinite;
+}
+
+.signal-line--out .signal-line__pulse {
+  animation-delay: 0.4s;
+}
+
+@keyframes signalFlow {
+  0% { top: 0; opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .signal-line__pulse { animation: none; opacity: 0.7; top: 50%; }
 }

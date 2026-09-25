@@ -87,51 +87,31 @@ export default function FaceExpression({ onClick = () => {}, compact = false }) 
   }, [moodKey]);
 
   const cardMarkup = (
-    <div className="expression-card" data-mood={moodKey}>
-      {/* Dynamic Laser Border Contour */}
-      <div className="card-ambient-glow" />
-
-      <div className="video-wrap">
-        <video ref={videoRef} className="video-element" playsInline autoPlay muted />
-        
-        {/* Subtle Architectural Lens Guides */}
-        <div className="reticle-marks">
-          <span className="reticle top-l" />
-          <span className="reticle top-r" />
-          <span className="reticle btm-l" />
-          <span className="reticle btm-r" />
+    <div className="porthole-unit" data-mood={moodKey}>
+      <div className="porthole">
+        <span className="porthole__ring" aria-hidden="true" />
+        <div className="porthole__glass">
+          <video ref={videoRef} className="porthole__video" playsInline autoPlay muted />
         </div>
+        <span className={`porthole__status-dot ${isLive ? "live" : ""}`} />
       </div>
 
-      {/* Telemetry Row Strictly Below Video */}
-      <div className="status-row">
-        <div className="status-telemetry">
-          <span className={`status-dot ${isLive ? "live" : ""}`} />
-          <div className="status-labels">
-            <span className="sub-tag">EXPRESSION</span>
-            <span className={`main-val ${badgePulse ? "pulse" : ""}`}>
-              {expression}
-            </span>
-          </div>
-        </div>
-        <span className="system-pill">MediaPipe v1.0</span>
+      <div className="readout">
+        <span className="readout__vu" aria-hidden="true">
+          <span /><span /><span /><span /><span />
+        </span>
+        <span className={`readout__mood ${badgePulse ? "pulse" : ""}`}>{expression}</span>
+        <span className="readout__system">MediaPipe v1.0</span>
       </div>
 
-      {/* High-Aesthetic Prismatic Trigger Button */}
-      <div className="controls">
-        <button
-          className={`btn-expression-trigger ${isProcessing ? "processing" : ""}`}
-          onClick={handleClick}
-          disabled={!isLive}
-        >
-          <div className="btn-ambient-fill" />
-          <span className="btn-content">
-            <span className="btn-icon">⚡</span>
-            {isProcessing ? "Synthesizing..." : "Detect Expression"}
-          </span>
-          <div className="btn-beam-shine" />
-        </button>
-      </div>
+      <button
+        className={`needle-btn ${isProcessing ? "processing" : ""}`}
+        onClick={handleClick}
+        disabled={!isLive}
+      >
+        <span className="needle-btn__dot" />
+        {isProcessing ? "Synthesizing…" : "Detect expression"}
+      </button>
     </div>
   );
 

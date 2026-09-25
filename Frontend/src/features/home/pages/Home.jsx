@@ -20,27 +20,30 @@ const Home = () => {
     <>
       <AmbientBackground />
 
-      <div className="site-container home-hero">
-        <section className="hero-section neon-hero">
-          <div className="hero-left">
-            <p className="eyebrow">
-              <span className="eyebrow-dot" />
-              Live camera detection
-            </p>
-            <h1 className="hero-title">Find music that matches your face</h1>
-            <p className="lead">
-              Moodify reads your expression through your camera and queues a track
-              to match — no typing, no searching.
-            </p>
+      <div className="site-container studio">
+        <header className="studio__brand">
+          <span className="studio__brand-mark" />
+          Moodify
+        </header>
+
+        <section className="studio__stage">
+          <p className="studio__tagline">
+            Find music that matches your face
+          </p>
+
+          <div className="signal-line signal-line--in">
+            <span className="signal-line__pulse" />
           </div>
 
-          <div className="hero-right">
-            <FaceExpression compact onClick={handleExpressionDetected} />
+          <FaceExpression compact onClick={handleExpressionDetected} />
+
+          <div className="signal-line signal-line--out">
+            <span className="signal-line__pulse" />
           </div>
         </section>
 
-        <Player />
         <SongList />
+        <Player />
       </div>
     </>
   );

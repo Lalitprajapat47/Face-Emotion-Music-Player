@@ -1,9 +1,10 @@
 .song-list {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 12px 24px 0;
   position: relative;
   z-index: 1;
+  width: 100%;
 }
 
 .song-list__header {
@@ -11,7 +12,7 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 20px;
+  margin-bottom: 26px;
 }
 
 .song-list__eyebrow {
@@ -45,10 +46,10 @@
 
 .song-list__row {
   display: flex;
-  gap: 18px;
+  gap: 26px;
   overflow-x: auto;
   overflow-y: visible;
-  padding: 6px 4px 20px 4px;
+  padding: 10px 6px 24px 6px;
   scrollbar-width: thin;
 }
 
@@ -63,8 +64,12 @@
   padding: 0;
   cursor: pointer;
   text-align: left;
+  position: relative;
 
-  /* staggered entrance so the row feels alive the moment it appears */
+  /* alternating tilt so the row reads like sleeves fanned out of a crate */
+  transform: rotate(calc(var(--i, 1) * 2.2deg));
+  transition: transform 220ms cubic-bezier(.2,.8,.2,1);
+
   opacity: 0;
   animation: songCardIn 460ms cubic-bezier(.2,.8,.2,1) forwards;
 
@@ -73,21 +78,42 @@
   }
 }
 
+.song-list__card:hover,
+.song-list__card.active {
+  transform: rotate(0deg) translateY(-4px);
+}
+
 @keyframes songCardIn {
-  from { opacity: 0; transform: translateY(14px) scale(0.97); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from { opacity: 0; transform: translateY(14px) rotate(calc(var(--i, 1) * 2.2deg)) scale(0.96); }
+  to { opacity: 1; transform: rotate(calc(var(--i, 1) * 2.2deg)) scale(1); }
+}
+
+/* A record peeking out from behind the sleeve — turntable motif */
+.song-list__vinyl-peek {
+  position: absolute;
+  top: 10px;
+  right: -12px;
+  width: 82%;
+  height: 82%;
+  border-radius: 50%;
+  background:
+    repeating-radial-gradient(circle at center, #1c1e25 0px, #1c1e25 2px, #23262e 3px, #23262e 4px);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
+  z-index: 0;
+  pointer-events: none;
 }
 
 .song-list__art {
   position: relative;
+  z-index: 1;
   width: 100%;
   aspect-ratio: 1 / 1;
-  border-radius: 14px;
+  border-radius: 10px;
   overflow: hidden;
   background: #0c0e14;
   border: 1px solid var(--border-hairline);
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.4);
-  transition: transform 220ms cubic-bezier(.2,.8,.2,1), border-color 220ms ease, box-shadow 220ms ease;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+  transition: border-color 220ms ease, box-shadow 220ms ease;
 }
 
 .song-list__poster {
@@ -95,7 +121,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 320ms ease, filter 320ms ease;
+  transition: transform 320ms ease;
 }
 
 .song-list__art::after {
@@ -106,7 +132,6 @@
   pointer-events: none;
 }
 
-/* Rotating conic glow ring — only shown behind the currently playing card */
 .song-list__glow-ring {
   position: absolute;
   inset: 0;
@@ -135,12 +160,12 @@
   position: absolute;
   right: 10px;
   bottom: 10px;
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   display: grid;
   place-items: center;
-  font-size: 12px;
+  font-size: 11px;
   color: #0a0b10;
   background: #fff;
   box-shadow: 0 6px 18px rgba(0,0,0,0.4);
@@ -155,13 +180,12 @@
   transform: translateY(0) scale(1);
 }
 
-/* Live "now playing" equalizer bars on the active card */
 .song-list__eq {
   position: absolute;
   right: 10px;
   bottom: 10px;
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: var(--mood-current);
   box-shadow: 0 6px 18px color-mix(in srgb, var(--mood-current) 50%, transparent);
@@ -170,19 +194,19 @@
   justify-content: center;
   gap: 3px;
   z-index: 1;
-
-  span {
-    width: 3px;
-    height: 8px;
-    border-radius: 2px;
-    background: #fff;
-    animation: eqBounce 900ms ease-in-out infinite;
-  }
-  span:nth-child(1) { animation-delay: 0ms; }
-  span:nth-child(2) { animation-delay: 180ms; }
-  span:nth-child(3) { animation-delay: 90ms; }
-  span:nth-child(4) { animation-delay: 260ms; }
 }
+
+.song-list__eq span {
+  width: 3px;
+  height: 8px;
+  border-radius: 2px;
+  background: #fff;
+  animation: eqBounce 900ms ease-in-out infinite;
+}
+.song-list__eq span:nth-child(1) { animation-delay: 0ms; }
+.song-list__eq span:nth-child(2) { animation-delay: 180ms; }
+.song-list__eq span:nth-child(3) { animation-delay: 90ms; }
+.song-list__eq span:nth-child(4) { animation-delay: 260ms; }
 
 @keyframes eqBounce {
   0%, 100% { height: 5px; }
@@ -190,7 +214,6 @@
 }
 
 .song-list__card:hover .song-list__art {
-  transform: translateY(-4px);
   border-color: color-mix(in srgb, var(--mood-current) 50%, var(--border-hairline));
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px color-mix(in srgb, var(--mood-current) 30%, transparent);
 }
@@ -205,6 +228,8 @@
 }
 
 .song-list__meta {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -233,24 +258,12 @@
 }
 
 @media (max-width: 900px) {
-  .song-list {
-    padding: 0 16px;
-  }
-  .song-list__card {
-    width: 136px;
-  }
+  .song-list { padding: 12px 16px 0; }
+  .song-list__card { width: 136px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .song-list__card {
-    animation: none;
-    opacity: 1;
-  }
-  .song-list__glow-ring {
-    animation: none;
-  }
-  .song-list__eq span {
-    animation: none;
-    height: 9px;
-  }
+  .song-list__card { animation: none; opacity: 1; transform: none; }
+  .song-list__glow-ring { animation: none; }
+  .song-list__eq span { animation: none; height: 9px; }
 }

@@ -1,239 +1,207 @@
-.expression-card {
-  width: 100%;
-  max-width: 480px;
-  position: relative;
-  background: rgba(14, 16, 22, 0.72);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
-  border-radius: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 16px;
-  box-sizing: border-box;
-  box-shadow: 
-    0 30px 60px -15px rgba(0, 0, 0, 0.8),
-    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
-  transition: border-color 0.4s ease, box-shadow 0.4s ease;
-
-  /* Mood accent color variables */
-  &[data-mood="happy"] { --mood-current: var(--mood-happy); }
-  &[data-mood="sad"] { --mood-current: var(--mood-sad); }
-  &[data-mood="surprised"] { --mood-current: var(--mood-surprised); }
-  &[data-mood="neutral"] { --mood-current: var(--mood-neutral); }
-  &[data-mood="detecting"] { --mood-current: var(--mood-detecting); }
-
-  .card-ambient-glow {
-    position: absolute;
-    inset: -1px;
-    border-radius: 23px;
-    background: linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--mood-current) 60%, transparent),
-      transparent 55%,
-      rgba(255, 255, 255, 0.05)
-    );
-    z-index: -1;
-    pointer-events: none;
-    opacity: 0.8;
-    transition: background 0.4s ease;
-  }
-}
-
-.video-wrap {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  border-radius: 16px;
-  overflow: hidden;
-  background: #020305;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) inset;
-
-  .video-element {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transform: scaleX(-1);
-    display: block;
-  }
-
-  .reticle-marks {
-    position: absolute;
-    inset: 12px;
-    pointer-events: none;
-
-    .reticle {
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      border-color: rgba(255, 255, 255, 0.35);
-      border-style: solid;
-
-      &.top-l { top: 0; left: 0; border-width: 1.5px 0 0 1.5px; }
-      &.top-r { top: 0; right: 0; border-width: 1.5px 1.5px 0 0; }
-      &.btm-l { bottom: 0; left: 0; border-width: 0 0 1.5px 1.5px; }
-      &.btm-r { bottom: 0; right: 0; border-width: 0 1.5px 1.5px 0; }
-    }
-  }
-}
-
-/* Status Telemetry Row */
-.status-row {
+.expression-card-compact {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-top: 16px;
-  padding: 0 4px;
-
-  .status-telemetry {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    .status-dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      background: var(--mood-current);
-      box-shadow: 0 0 12px var(--mood-current);
-      transition: background 0.3s ease, box-shadow 0.3s ease;
-
-      &.live {
-        animation: pulseLaserDot 2.2s infinite ease-out;
-      }
-    }
-
-    .status-labels {
-      display: flex;
-      flex-direction: column;
-
-      .sub-tag {
-        font-family: ui-monospace, SFMono-Regular, monospace;
-        font-size: 0.65rem;
-        letter-spacing: 0.08em;
-        color: rgba(255, 255, 255, 0.4);
-      }
-
-      .main-val {
-        font-size: 1rem;
-        font-weight: 700;
-        color: #ffffff;
-        text-transform: capitalize;
-        transition: color 0.3s ease;
-
-        &.pulse {
-          color: var(--mood-current);
-        }
-      }
-    }
-  }
-
-  .system-pill {
-    font-family: ui-monospace, SFMono-Regular, monospace;
-    font-size: 0.72rem;
-    color: rgba(255, 255, 255, 0.5);
-    background: rgba(255, 255, 255, 0.05);
-    padding: 4px 8px;
-    border-radius: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-  }
+  justify-content: center;
+  position: relative;
+  z-index: 1;
 }
 
-/* THE KINETIC PRISMATIC BUTTON */
-.controls {
-  margin-top: 18px;
+.expression-hero-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.porthole-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+/* The camera as a circular "porthole" — the dominant visual anchor of the
+   page instead of a small boxed card. */
+.porthole {
+  position: relative;
+  width: 260px;
+  height: 260px;
+}
+
+@media (max-width: 640px) {
+  .porthole { width: 190px; height: 190px; }
+}
+
+/* Rotating vinyl-groove ring, colored by the detected mood */
+.porthole__ring {
+  position: absolute;
+  inset: -9px;
+  border-radius: 50%;
+  padding: 3px;
+  background: conic-gradient(
+    from 0deg,
+    var(--mood-current),
+    transparent 32%,
+    transparent 68%,
+    var(--mood-current)
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: portholeRingSpin 7s linear infinite;
+}
+
+@keyframes portholeRingSpin {
+  to { transform: rotate(360deg); }
+}
+
+.porthole__glass {
+  position: relative;
   width: 100%;
-
-  .btn-expression-trigger {
-    width: 100%;
-    position: relative;
-    overflow: hidden;
-    padding: 16px 24px;
-    border-radius: 12px;
-    border: 1px solid color-mix(in srgb, var(--mood-current) 55%, rgba(255, 255, 255, 0.15));
-    background: rgba(20, 24, 34, 0.85);
-    cursor: pointer;
-    box-shadow: 
-      0 12px 28px -6px rgba(0, 0, 0, 0.6),
-      0 0 0 1px rgba(255, 255, 255, 0.05) inset;
-    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.3s ease;
-
-    .btn-ambient-fill {
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at 50% 100%, color-mix(in srgb, var(--mood-current) 25%, transparent), transparent 75%);
-      opacity: 0.8;
-      transition: opacity 0.3s ease;
-    }
-
-    .btn-content {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      font-family: 'Space Grotesk', system-ui, sans-serif;
-      font-size: 1rem;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-      color: #ffffff;
-      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
-
-      .btn-icon {
-        font-size: 1.1rem;
-        color: var(--mood-current);
-        transition: color 0.3s ease;
-      }
-    }
-
-    /* Prismatic sweep laser shine across the button surface */
-    .btn-beam-shine {
-      position: absolute;
-      top: 0;
-      left: -120%;
-      width: 80%;
-      height: 100%;
-      background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.25),
-        transparent
-      );
-      transform: skewX(-25deg);
-      transition: left 0.75s ease-in-out;
-      pointer-events: none;
-    }
-
-    &:hover:not(:disabled) {
-      transform: translateY(-2px);
-      border-color: var(--mood-current);
-      box-shadow: 
-        0 16px 36px -8px rgba(0, 0, 0, 0.8),
-        0 0 24px -4px color-mix(in srgb, var(--mood-current) 40%, transparent);
-
-      .btn-ambient-fill {
-        opacity: 1;
-      }
-
-      .btn-beam-shine {
-        left: 160%;
-      }
-    }
-
-    &:active:not(:disabled) {
-      transform: translateY(1px);
-    }
-
-    &:disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
-      border-color: rgba(255, 255, 255, 0.08);
-      box-shadow: none;
-    }
-  }
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #0c0e14;
+  border: 1px solid var(--border-hairline);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05), 0 22px 55px rgba(0, 0, 0, 0.55);
 }
 
-@keyframes pulseLaserDot {
-  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--mood-current) 70%, transparent); }
+.porthole__video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scaleX(-1); /* mirrored — feels natural for a self-facing camera */
+}
+
+.porthole__status-dot {
+  position: absolute;
+  bottom: 12px;
+  right: 14px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--mood-current);
+  border: 2px solid #05060a;
+  z-index: 2;
+}
+
+.porthole__status-dot.live {
+  animation: portholeDotPulse 2200ms ease-out infinite;
+}
+
+@keyframes portholeDotPulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--mood-current) 55%, transparent); }
   70% { box-shadow: 0 0 0 9px transparent; }
   100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+/* Readout — a small "instrument panel" row: live VU bars + mood label */
+.readout {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-hairline);
+  border-radius: 999px;
+  padding: 9px 18px 9px 14px;
+  max-width: 100%;
+}
+
+.readout__vu {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.readout__vu span {
+  width: 3px;
+  border-radius: 2px;
+  background: var(--mood-current);
+  transform-origin: bottom;
+  animation: vuBounce 900ms ease-in-out infinite;
+}
+
+.readout__vu span:nth-child(1) { height: 6px; animation-delay: 0ms; }
+.readout__vu span:nth-child(2) { height: 10px; animation-delay: 120ms; }
+.readout__vu span:nth-child(3) { height: 14px; animation-delay: 240ms; }
+.readout__vu span:nth-child(4) { height: 9px; animation-delay: 360ms; }
+.readout__vu span:nth-child(5) { height: 6px; animation-delay: 480ms; }
+
+@keyframes vuBounce {
+  0%, 100% { transform: scaleY(0.45); }
+  50% { transform: scaleY(1); }
+}
+
+.readout__mood {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-transform: capitalize;
+  white-space: nowrap;
+  transition: color 200ms ease;
+}
+
+.readout__mood.pulse {
+  color: var(--mood-current);
+}
+
+.readout__system {
+  font-size: 10.5px;
+  color: var(--text-secondary);
+  margin-left: 4px;
+  padding-left: 12px;
+  border-left: 1px solid var(--border-hairline);
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .readout__system { display: none; }
+}
+
+/* Tonearm-style trigger — a tactile pill instead of a big rectangular button */
+.needle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid color-mix(in srgb, var(--mood-current) 55%, var(--border-hairline));
+  background: color-mix(in srgb, var(--mood-current) 16%, transparent);
+  color: var(--text-primary);
+  padding: 13px 24px;
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 200ms ease, background 200ms ease, border-color 200ms ease;
+}
+
+.needle-btn__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mood-current);
+  flex-shrink: 0;
+}
+
+.needle-btn:not(:disabled):hover {
+  transform: translateY(-2px);
+  background: color-mix(in srgb, var(--mood-current) 24%, transparent);
+  box-shadow: 0 14px 30px color-mix(in srgb, var(--mood-current) 30%, transparent);
+}
+
+.needle-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.needle-btn.processing .needle-btn__dot {
+  animation: needlePulse 700ms ease-in-out infinite;
+}
+
+@keyframes needlePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.7); }
 }
