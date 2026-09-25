@@ -21,6 +21,7 @@
   text-transform: uppercase;
   color: var(--mood-current);
   margin: 0 0 4px 2px;
+  transition: color 320ms ease;
 }
 
 .song-list__title {
@@ -46,7 +47,8 @@
   display: flex;
   gap: 18px;
   overflow-x: auto;
-  padding: 4px 4px 18px 4px;
+  overflow-y: visible;
+  padding: 6px 4px 20px 4px;
   scrollbar-width: thin;
 }
 
@@ -61,6 +63,19 @@
   padding: 0;
   cursor: pointer;
   text-align: left;
+
+  /* staggered entrance so the row feels alive the moment it appears */
+  opacity: 0;
+  animation: songCardIn 460ms cubic-bezier(.2,.8,.2,1) forwards;
+
+  @for $i from 1 through 20 {
+    &:nth-child(#{$i}) { animation-delay: #{$i * 55}ms; }
+  }
+}
+
+@keyframes songCardIn {
+  from { opacity: 0; transform: translateY(14px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .song-list__art {
@@ -80,7 +95,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 320ms ease;
+  transition: transform 320ms ease, filter 320ms ease;
 }
 
 .song-list__art::after {
@@ -89,6 +104,31 @@
   inset: 0;
   background: linear-gradient(180deg, transparent 55%, rgba(0,0,0,0.75) 100%);
   pointer-events: none;
+}
+
+/* Rotating conic glow ring — only shown behind the currently playing card */
+.song-list__glow-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 3px;
+  background: conic-gradient(
+    from 0deg,
+    var(--mood-current),
+    transparent 30%,
+    transparent 70%,
+    var(--mood-current)
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: glowRingSpin 3.2s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes glowRingSpin {
+  to { transform: rotate(360deg); }
 }
 
 .song-list__play-icon {
@@ -106,8 +146,47 @@
   box-shadow: 0 6px 18px rgba(0,0,0,0.4);
   opacity: 0;
   transform: translateY(6px) scale(0.9);
-  transition: opacity 200ms ease, transform 200ms ease, background 200ms ease;
+  transition: opacity 200ms ease, transform 200ms ease;
   z-index: 1;
+}
+
+.song-list__card:hover .song-list__play-icon {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Live "now playing" equalizer bars on the active card */
+.song-list__eq {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--mood-current);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--mood-current) 50%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  z-index: 1;
+
+  span {
+    width: 3px;
+    height: 8px;
+    border-radius: 2px;
+    background: #fff;
+    animation: eqBounce 900ms ease-in-out infinite;
+  }
+  span:nth-child(1) { animation-delay: 0ms; }
+  span:nth-child(2) { animation-delay: 180ms; }
+  span:nth-child(3) { animation-delay: 90ms; }
+  span:nth-child(4) { animation-delay: 260ms; }
+}
+
+@keyframes eqBounce {
+  0%, 100% { height: 5px; }
+  50% { height: 13px; }
 }
 
 .song-list__card:hover .song-list__art {
@@ -120,20 +199,9 @@
   transform: scale(1.06);
 }
 
-.song-list__card:hover .song-list__play-icon,
-.song-list__card.active .song-list__play-icon {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
 .song-list__card.active .song-list__art {
   border-color: var(--mood-current);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5), 0 0 0 2px var(--mood-current);
-}
-
-.song-list__card.active .song-list__play-icon {
-  background: var(--mood-current);
-  color: #fff;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55), 0 0 26px -6px color-mix(in srgb, var(--mood-current) 70%, transparent);
 }
 
 .song-list__meta {
@@ -150,12 +218,17 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: color 200ms ease;
+}
+
+.song-list__card.active .song-list__name {
+  color: var(--mood-current);
 }
 
 .song-list__mood {
   font-size: 11.5px;
   font-weight: 500;
-  color: var(--mood-current);
+  color: var(--text-secondary);
   text-transform: capitalize;
 }
 
@@ -165,5 +238,19 @@
   }
   .song-list__card {
     width: 136px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .song-list__card {
+    animation: none;
+    opacity: 1;
+  }
+  .song-list__glow-ring {
+    animation: none;
+  }
+  .song-list__eq span {
+    animation: none;
+    height: 9px;
   }
 }
