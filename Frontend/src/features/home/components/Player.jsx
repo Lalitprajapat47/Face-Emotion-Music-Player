@@ -26,12 +26,25 @@ const Player = () => {
     const [showSpeed, setShowSpeed] = useState(false)
     const [isMuted, setIsMuted] = useState(false)
 
-    // Reset player when song changes
+    // Reset player when song changes — and auto-play the new song, since
+    // the user already made a deliberate choice (clicking a card / hitting
+    // Detect Expression) to hear this track.
     useEffect(() => {
-        if (audioRef.current) {
-            audioRef.current.load()
-            setIsPlaying(false)
-            setCurrentTime(0)
+        const audio = audioRef.current
+        if (!audio) return
+        audio.load()
+        setCurrentTime(0)
+
+        const playPromise = audio.play()
+        if (playPromise !== undefined) {
+            playPromise
+                .then(() => setIsPlaying(true))
+                .catch(() => {
+                    // Browser blocked autoplay (e.g. no prior user gesture) —
+                    // fall back to showing the paused state so the user can
+                    // press play themselves instead of the UI lying about it.
+                    setIsPlaying(false)
+                })
         }
     }, [song?.url])
 
