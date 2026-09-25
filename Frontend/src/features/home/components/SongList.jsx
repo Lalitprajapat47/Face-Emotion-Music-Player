@@ -35,9 +35,14 @@ const SongList = () => {
                   alt=""
                   loading="lazy"
                 />
-                <span className="song-list__play-icon" aria-hidden="true">
-                  {isActive ? '❚❚' : '▶'}
-                </span>
+                {isActive ? (
+                  <span className="song-list__eq" aria-hidden="true">
+                    <span /><span /><span /><span />
+                  </span>
+                ) : (
+                  <span className="song-list__play-icon" aria-hidden="true">▶</span>
+                )}
+                {isActive && <span className="song-list__glow-ring" aria-hidden="true" />}
               </div>
               <div className="song-list__meta">
                 <span className="song-list__name">{item.title}</span>
