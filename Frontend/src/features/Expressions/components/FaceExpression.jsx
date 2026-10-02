@@ -109,7 +109,7 @@ export default function FaceExpression({ onClick = () => {}, compact = false }) 
         onClick={handleClick}
         disabled={!isLive}
       >
-        <span className="needle-btn__needle" aria-hidden="true" />
+        <span className="needle-btn__scan" aria-hidden="true" />
         {isProcessing ? "Synthesizing…" : "Detect expression"}
       </button>
     </div>
