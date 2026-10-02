@@ -6,7 +6,7 @@ import { SongContext } from "../song.context";
 export const useSong = () => {
     const context = useContext(SongContext)
 
-    const { loading, setLoading, song, setSong, songList, setSongList } = context
+    const { loading, setLoading, song, setSong, songList, setSongList, isPlaying, setIsPlaying } = context
 
     // Default behaviour — unchanged: fetches one song for the mood and
     // plays it immediately.
@@ -49,6 +49,6 @@ export const useSong = () => {
         setSong(selectedSong)
     }
 
-    return ({ loading, song, songList, handleGetSong, handleGetSongList, playSong })
+    return ({ loading, song, songList, handleGetSong, handleGetSongList, playSong, isPlaying, setIsPlaying })
 
 }
