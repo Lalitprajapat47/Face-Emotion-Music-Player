@@ -93,7 +93,7 @@ export default function FaceExpression({ onClick = () => {}, compact = false }) 
         <div className="porthole__glass">
           <video ref={videoRef} className="porthole__video" playsInline autoPlay muted />
         </div>
-        <span className={`porthole__status-dot ${isLive ? "live" : ""}`} />
+        {isLive && <span className="porthole__live-tag">LIVE</span>}
       </div>
 
       <div className="readout">
@@ -109,7 +109,7 @@ export default function FaceExpression({ onClick = () => {}, compact = false }) 
         onClick={handleClick}
         disabled={!isLive}
       >
-        <span className="needle-btn__dot" />
+        <span className="needle-btn__needle" aria-hidden="true" />
         {isProcessing ? "Synthesizing…" : "Detect expression"}
       </button>
     </div>
