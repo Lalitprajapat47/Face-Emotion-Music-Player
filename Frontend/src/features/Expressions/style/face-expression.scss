@@ -179,19 +179,27 @@
   transition: transform 160ms ease, box-shadow 200ms ease, background 200ms ease, border-color 200ms ease;
 }
 
-.needle-btn__needle {
-  width: 3px;
-  height: 14px;
-  border-radius: 2px;
+.needle-btn__scan {
+  position: relative;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
   background: var(--mood-current);
   flex-shrink: 0;
-  transform: rotate(22deg);
-  transform-origin: bottom center;
-  transition: transform 200ms ease;
 }
 
-.needle-btn:not(:disabled):hover .needle-btn__needle {
-  transform: rotate(0deg);
+.needle-btn__scan::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--mood-current);
+  animation: scanPing 1.8s ease-out infinite;
+}
+
+@keyframes scanPing {
+  0% { transform: scale(1); opacity: 0.9; }
+  100% { transform: scale(3.2); opacity: 0; }
 }
 
 .needle-btn:not(:disabled):hover {
@@ -205,11 +213,6 @@
   cursor: not-allowed;
 }
 
-.needle-btn.processing .needle-btn__needle {
-  animation: needleDrop 700ms ease-in-out infinite;
-}
-
-@keyframes needleDrop {
-  0%, 100% { transform: rotate(22deg); }
-  50% { transform: rotate(0deg); }
+.needle-btn.processing .needle-btn__scan::before {
+  animation: scanPing 700ms ease-out infinite;
 }
