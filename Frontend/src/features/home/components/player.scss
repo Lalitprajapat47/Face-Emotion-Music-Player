@@ -181,8 +181,8 @@
 
       &:hover {
         transform: scale(1.05);
-        background: #ffffff;
-        box-shadow: 0 12px 30px -4px rgba(255, 255, 255, 0.4);
+        background: color-mix(in srgb, var(--mood-current) 82%, #ffffff 18%);
+        box-shadow: 0 12px 30px -4px color-mix(in srgb, var(--mood-current) 55%, transparent);
       }
     }
 
