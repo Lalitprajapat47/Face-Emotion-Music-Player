@@ -3,7 +3,7 @@ import { useSong } from '../hooks/useSong';
 import '../style/song-list.scss';
 
 const SongList = () => {
-  const { songList, song, playSong } = useSong();
+  const { songList, song, playSong, isPlaying } = useSong();
 
   // Nothing (or only the one already-playing song) to browse — stay hidden
   // instead of showing an empty/pointless section.
@@ -37,7 +37,7 @@ const SongList = () => {
                   alt=""
                   loading="lazy"
                 />
-                {isActive ? (
+                {isActive && isPlaying ? (
                   <span className="song-list__eq" aria-hidden="true">
                     <span /><span /><span /><span />
                   </span>
