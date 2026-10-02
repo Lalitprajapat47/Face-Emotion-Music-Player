@@ -22,7 +22,9 @@ const Home = () => {
 
       <div className="site-container studio">
         <header className="studio__brand">
-          <span className="studio__brand-mark" />
+          <span className="studio__brand-mark" aria-hidden="true">
+            <span /><span /><span />
+          </span>
           Moodify
         </header>
 
