@@ -13,12 +13,11 @@ const formatTime = (seconds) => {
 }
 
 const Player = () => {
-    const { song } = useSong()
+    const { song, isPlaying, setIsPlaying } = useSong()
 
     const audioRef = useRef(null)
     const progressRef = useRef(null)
 
-    const [isPlaying, setIsPlaying] = useState(false)
     const [currentTime, setCurrentTime] = useState(0)
     const [duration, setDuration] = useState(0)
     const [speed, setSpeed] = useState(1)
