@@ -74,25 +74,26 @@
   transform: scaleX(-1); /* mirrored — feels natural for a self-facing camera */
 }
 
-.porthole__status-dot {
+.porthole__live-tag {
   position: absolute;
-  bottom: 12px;
-  right: 14px;
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #0c0e14;
   background: var(--mood-current);
+  padding: 3px 10px;
+  border-radius: 999px;
   border: 2px solid #05060a;
   z-index: 2;
+  animation: liveTagGlow 2200ms ease-out infinite;
 }
 
-.porthole__status-dot.live {
-  animation: portholeDotPulse 2200ms ease-out infinite;
-}
-
-@keyframes portholeDotPulse {
-  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--mood-current) 55%, transparent); }
-  70% { box-shadow: 0 0 0 9px transparent; }
+@keyframes liveTagGlow {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--mood-current) 50%, transparent); }
+  70% { box-shadow: 0 0 0 8px transparent; }
   100% { box-shadow: 0 0 0 0 transparent; }
 }
 
@@ -178,12 +179,19 @@
   transition: transform 160ms ease, box-shadow 200ms ease, background 200ms ease, border-color 200ms ease;
 }
 
-.needle-btn__dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+.needle-btn__needle {
+  width: 3px;
+  height: 14px;
+  border-radius: 2px;
   background: var(--mood-current);
   flex-shrink: 0;
+  transform: rotate(22deg);
+  transform-origin: bottom center;
+  transition: transform 200ms ease;
+}
+
+.needle-btn:not(:disabled):hover .needle-btn__needle {
+  transform: rotate(0deg);
 }
 
 .needle-btn:not(:disabled):hover {
@@ -197,11 +205,11 @@
   cursor: not-allowed;
 }
 
-.needle-btn.processing .needle-btn__dot {
-  animation: needlePulse 700ms ease-in-out infinite;
+.needle-btn.processing .needle-btn__needle {
+  animation: needleDrop 700ms ease-in-out infinite;
 }
 
-@keyframes needlePulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.7); }
+@keyframes needleDrop {
+  0%, 100% { transform: rotate(22deg); }
+  50% { transform: rotate(0deg); }
 }
