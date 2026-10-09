@@ -1,33 +1,64 @@
+/* Lets the active row's ring spin its *gradient* instead of rotating the
+   element (rotating a square ring would swing its corners outward). */
+@property --ring-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+/* ── Results dock: collapsible side panel ───────────────────────────────
+   Zero width + transparent until songs exist; then it grows open and the
+   whole [stage | wire | panel] group re-centers, sliding the camera left. */
 .song-list {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 12px 24px 0;
+  flex: 0 0 auto;
+  width: 0;
+  opacity: 0;
+  overflow: hidden;
   position: relative;
   z-index: 1;
-  width: 100%;
+  transition: width 560ms cubic-bezier(.2, .8, .2, 1), opacity 400ms ease;
+}
+
+.song-list.is-open {
+  width: 400px;
+  opacity: 1;
+}
+
+.song-list__inner {
+  width: 400px; /* fixed, so contents don't reflow while the outer width animates */
+  max-height: min(540px, calc(100vh - 240px));
+  display: flex;
+  flex-direction: column;
+  padding: 20px 10px 14px 18px;
+  border: 1px solid var(--border-hairline);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .song-list__header {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 26px;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-right: 8px;
 }
 
 .song-list__eyebrow {
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--mood-current);
-  margin: 0 0 4px 2px;
+  margin: 0 0 3px 1px;
   transition: color 320ms ease;
 }
 
 .song-list__title {
   font-family: var(--font-display);
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
@@ -35,110 +66,113 @@
 }
 
 .song-list__count {
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--text-secondary);
-  padding: 6px 12px;
+  padding: 5px 11px;
   border: 1px solid var(--border-hairline);
   border-radius: 999px;
   white-space: nowrap;
 }
 
-.song-list__row {
-  display: flex;
-  gap: 26px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding: 36px 6px 56px 6px;
-  scrollbar-width: thin;
-}
-
-.song-list__card {
-  flex: 0 0 auto;
-  width: 168px;
+.song-list__rows {
+  list-style: none;
+  margin: 0;
+  padding: 2px 8px 2px 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
+  gap: 4px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+/* ── One song row ───────────────────────────────────────────────────── */
+.song-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) 30px;
+  align-items: center;
+  gap: 14px;
+  padding: 7px 10px 7px 7px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: inherit;
   text-align: left;
+  cursor: pointer;
+  transition: background 180ms ease, border-color 180ms ease;
+
+  /* staggered entrance — the delay lets the panel finish opening first */
+  animation: songRowIn 420ms cubic-bezier(.2, .8, .2, 1) both;
+  animation-delay: calc(var(--n, 0) * 55ms + 280ms);
+}
+
+@keyframes songRowIn {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.song-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.song-row.active {
+  background: color-mix(in srgb, var(--mood-current) 10%, transparent);
+  border-color: color-mix(in srgb, var(--mood-current) 38%, var(--border-hairline));
+}
+
+/* Thumbnail with a record peeking out from behind it (turntable motif) */
+.song-row__art {
   position: relative;
-
-  /* alternating tilt so the row reads like sleeves fanned out of a crate */
-  transform: rotate(calc(var(--i, 1) * 2.2deg));
-  transition: transform 220ms cubic-bezier(.2,.8,.2,1);
-
-  opacity: 0;
-  animation: songCardIn 460ms cubic-bezier(.2,.8,.2,1) forwards;
-
-  @for $i from 1 through 20 {
-    &:nth-child(#{$i}) { animation-delay: #{$i * 55}ms; }
-  }
+  width: 52px;
+  height: 52px;
 }
 
-.song-list__card:hover,
-.song-list__card.active {
-  transform: rotate(0deg) translateY(-4px);
-}
-
-@keyframes songCardIn {
-  from { opacity: 0; transform: translateY(14px) rotate(calc(var(--i, 1) * 2.2deg)) scale(0.96); }
-  to { opacity: 1; transform: rotate(calc(var(--i, 1) * 2.2deg)) scale(1); }
-}
-
-/* A record peeking out from behind the sleeve — turntable motif */
-.song-list__vinyl-peek {
+.song-row__vinyl {
   position: absolute;
-  top: 10px;
-  right: -12px;
-  width: 82%;
-  height: 82%;
+  top: 4px;
+  right: -9px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background:
-    repeating-radial-gradient(circle at center, #1c1e25 0px, #1c1e25 2px, #23262e 3px, #23262e 4px);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
-  z-index: 0;
-  pointer-events: none;
+  background: repeating-radial-gradient(
+    circle at center,
+    #1c1e25 0px, #1c1e25 2px,
+    #23262e 3px, #23262e 4px
+  );
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  transition: transform 260ms cubic-bezier(.2, .8, .2, 1);
 }
 
-.song-list__art {
+.song-row:hover .song-row__vinyl,
+.song-row.active .song-row__vinyl {
+  transform: translateX(5px);
+}
+
+.song-row__poster {
   position: relative;
   z-index: 1;
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  border-radius: 10px;
-  overflow: hidden;
-  background: #0c0e14;
-  border: 1px solid var(--border-hairline);
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
-  transition: border-color 220ms ease, box-shadow 220ms ease;
-}
-
-.song-list__poster {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 320ms ease;
+  border-radius: 10px;
+  background: #0c0e14;
+  border: 1px solid var(--border-hairline);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
 }
 
-.song-list__art::after {
-  content: "";
+.song-row__ring {
   position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, transparent 55%, rgba(0,0,0,0.75) 100%);
-  pointer-events: none;
-}
-
-.song-list__glow-ring {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 3px;
+  inset: -3px;
+  z-index: 2;
+  border-radius: 13px;
+  padding: 2px;
   background: conic-gradient(
-    from 0deg,
+    from var(--ring-angle),
     var(--mood-current),
     transparent 30%,
     transparent 70%,
@@ -147,97 +181,24 @@
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
-  animation: glowRingSpin 3.2s linear infinite;
+  animation: ringSpin 3.2s linear infinite;
   pointer-events: none;
-  z-index: 0;
 }
 
-@keyframes glowRingSpin {
-  to { transform: rotate(360deg); }
+@keyframes ringSpin {
+  to { --ring-angle: 360deg; }
 }
 
-.song-list__play-icon {
-  position: absolute;
-  right: 10px;
-  bottom: 10px;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-size: 11px;
-  color: #0a0b10;
-  background: #fff;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.4);
-  opacity: 0;
-  transform: translateY(6px) scale(0.9);
-  transition: opacity 200ms ease, transform 200ms ease;
-  z-index: 1;
-}
-
-.song-list__card:hover .song-list__play-icon {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
-.song-list__eq {
-  position: absolute;
-  right: 10px;
-  bottom: 10px;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--mood-current);
-  box-shadow: 0 6px 18px color-mix(in srgb, var(--mood-current) 50%, transparent);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  z-index: 1;
-}
-
-.song-list__eq span {
-  width: 3px;
-  height: 8px;
-  border-radius: 2px;
-  background: #fff;
-  animation: eqBounce 900ms ease-in-out infinite;
-}
-.song-list__eq span:nth-child(1) { animation-delay: 0ms; }
-.song-list__eq span:nth-child(2) { animation-delay: 180ms; }
-.song-list__eq span:nth-child(3) { animation-delay: 90ms; }
-.song-list__eq span:nth-child(4) { animation-delay: 260ms; }
-
-@keyframes eqBounce {
-  0%, 100% { height: 5px; }
-  50% { height: 13px; }
-}
-
-.song-list__card:hover .song-list__art {
-  border-color: color-mix(in srgb, var(--mood-current) 50%, var(--border-hairline));
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px color-mix(in srgb, var(--mood-current) 30%, transparent);
-}
-
-.song-list__card:hover .song-list__poster {
-  transform: scale(1.06);
-}
-
-.song-list__card.active .song-list__art {
-  border-color: var(--mood-current);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55), 0 0 26px -6px color-mix(in srgb, var(--mood-current) 70%, transparent);
-}
-
-.song-list__meta {
-  position: relative;
-  z-index: 1;
+/* Title + mood */
+.song-row__meta {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 0 2px;
+  gap: 3px;
+  min-width: 0;
 }
 
-.song-list__name {
-  font-size: 13.5px;
+.song-row__name {
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
   white-space: nowrap;
@@ -246,24 +207,109 @@
   transition: color 200ms ease;
 }
 
-.song-list__card.active .song-list__name {
+.song-row.active .song-row__name {
   color: var(--mood-current);
 }
 
-.song-list__mood {
+.song-row__mood {
   font-size: 11.5px;
   font-weight: 500;
   color: var(--text-secondary);
   text-transform: capitalize;
 }
 
-@media (max-width: 900px) {
-  .song-list { padding: 12px 16px 0; }
-  .song-list__card { width: 136px; }
+/* Right-hand state indicator: play glyph on hover, live bars when playing */
+.song-row__state {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+}
+
+.song-row__play {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  color: #0a0b10;
+  background: #fff;
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.song-row:hover .song-row__play {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.song-row.active .song-row__play {
+  opacity: 1;
+  transform: scale(1);
+  background: color-mix(in srgb, var(--mood-current) 85%, #fff 15%);
+}
+
+.song-row__eq {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 3px;
+  height: 16px;
+}
+
+.song-row__eq span {
+  width: 3px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--mood-current);
+  transform-origin: bottom;
+  animation: rowEq 900ms ease-in-out infinite;
+}
+
+.song-row__eq span:nth-child(1) { animation-delay: 0ms; }
+.song-row__eq span:nth-child(2) { animation-delay: 180ms; }
+.song-row__eq span:nth-child(3) { animation-delay: 90ms; }
+.song-row__eq span:nth-child(4) { animation-delay: 260ms; }
+
+@keyframes rowEq {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+}
+
+/* ── Narrow screens: no room for two columns, so the panel stacks under
+   the camera and the page scrolls naturally ─────────────────────────── */
+@media (max-width: 980px) {
+  .song-list {
+    display: none;
+    width: 100%;
+    max-width: 440px;
+    opacity: 1;
+    overflow: visible;
+    margin-top: 8px;
+    padding: 0 16px;
+    transition: none;
+  }
+
+  .song-list.is-open {
+    display: block;
+    width: 100%;
+  }
+
+  .song-list__inner {
+    width: 100%;
+    max-height: none;
+  }
+
+  .song-list__rows {
+    overflow: visible;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .song-list__card { animation: none; opacity: 1; transform: none; }
-  .song-list__glow-ring { animation: none; }
-  .song-list__eq span { animation: none; height: 9px; }
+  .song-list { transition: none; }
+  .song-row { animation: none; }
+  .song-row__ring { animation: none; }
+  .song-row__eq span { animation: none; transform: scaleY(0.7); }
 }
