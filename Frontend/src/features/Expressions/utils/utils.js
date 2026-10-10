@@ -117,7 +117,7 @@ export const init = async ({ landmarkerRef, videoRef, streamRef }) => {
 };
 
 let _lastDetectError = 0;
-export const detect = ({ landmarkerRef, videoRef, setExpression }) => {
+export const detect = ({ landmarkerRef, videoRef, setExpression, onPose }) => {
     if (!landmarkerRef.current || !videoRef.current) return;
 
     // ensure video frame available and dimensions are > 0
@@ -133,6 +133,22 @@ export const detect = ({ landmarkerRef, videoRef, setExpression }) => {
             videoRef.current,
             performance.now()
         );
+
+        // Head-turn signal: where the nose tip sits between the two cheek
+        // edges (~0.5 when facing the camera, drifting towards 0 or 1 as the
+        // head turns). Reuses this frame's result — calling detectForVideo a
+        // second time with the same timestamp would throw.
+        if (onPose) {
+            const lm = results.faceLandmarks?.[0];
+            if (lm && lm[1] && lm[234] && lm[454]) {
+                const minX = Math.min(lm[234].x, lm[454].x);
+                const maxX = Math.max(lm[234].x, lm[454].x);
+                const faceWidth = maxX - minX;
+                onPose(faceWidth > 0.02 ? { ratio: (lm[1].x - minX) / faceWidth } : null);
+            } else {
+                onPose(null);
+            }
+        }
 
         if (results.faceBlendshapes?.length > 0) {
             const blendshapes = results.faceBlendshapes[0].categories;
