@@ -1,0 +1,234 @@
+/* ── Halo of records ─────────────────────────────────────────────────────
+   A zero-height strip sitting above the camera porthole. When songs exist it
+   grows open and overlaps the porthole by exactly its radius, so the strip's
+   bottom edge is the porthole's centre — that is the origin every record
+   orbits around. */
+.orbit {
+  --orbit-r: calc(var(--porthole-size, 210px) / 2 + 74px);
+
+  position: relative;
+  align-self: center;
+  width: min(560px, 94vw);
+  height: 0;
+  margin-bottom: 0;
+  pointer-events: none;
+  touch-action: pan-y;          /* horizontal swipes are ours, vertical scroll stays native */
+  outline: none;
+  transition:
+    height 650ms cubic-bezier(.2, .8, .2, 1),
+    margin-bottom 650ms cubic-bezier(.2, .8, .2, 1);
+}
+
+.orbit.is-open {
+  height: calc(var(--orbit-r) + 104px);
+  margin-bottom: calc(var(--porthole-size, 210px) / -2);
+  pointer-events: auto;
+  cursor: grab;
+}
+
+/* ── Title of the focused record ──────────────────────────────────────── */
+.orbit__label {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 30;
+}
+
+.orbit__text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 150px;
+  max-width: 250px;
+  animation: orbitTextIn 380ms cubic-bezier(.2, .8, .2, 1) both;
+}
+
+@keyframes orbitTextIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.orbit__title {
+  max-width: 100%;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.orbit__count {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 11px;
+  color: var(--mood-current);
+  letter-spacing: 0.06em;
+  transition: color 320ms ease;
+}
+
+.orbit__nav {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  padding: 0 0 2px;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--text-primary);
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-hairline);
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, opacity 160ms ease;
+}
+
+.orbit__nav:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--mood-current) 18%, transparent);
+  border-color: color-mix(in srgb, var(--mood-current) 50%, var(--border-hairline));
+}
+
+.orbit__nav:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+/* ── One record ───────────────────────────────────────────────────────── */
+.record {
+  --d: 80px;
+
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: var(--d);
+  height: var(--d);
+  margin-left: calc(var(--d) / -2);
+  margin-bottom: calc(var(--d) / -2);   /* centre of the record = origin of the orbit */
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  will-change: transform;
+  transition:
+    transform 650ms cubic-bezier(.2, .8, .2, 1),
+    opacity 450ms ease;
+}
+
+.record__disc {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #0b0c10;
+  box-shadow:
+    0 12px 26px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.record__art {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* fine concentric grooves over the artwork */
+.record__grooves {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+    circle at center,
+    rgba(0, 0, 0, 0) 0px,
+    rgba(0, 0, 0, 0) 2px,
+    rgba(0, 0, 0, 0.2) 2.5px,
+    rgba(0, 0, 0, 0.2) 3px
+  );
+  pointer-events: none;
+}
+
+.record__hole {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  background: #05060a;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.14);
+}
+
+/* Gloss lives outside the spinning disc, so the light stays put while the
+   record turns underneath it — like a real vinyl catching a lamp. */
+.record__sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  background: conic-gradient(
+    from 210deg,
+    transparent 0 16%,
+    rgba(255, 255, 255, 0.24) 23%,
+    transparent 31% 66%,
+    rgba(255, 255, 255, 0.13) 73%,
+    transparent 81%
+  );
+}
+
+/* Focused record: mood-coloured ring, and it spins only while audio is
+   actually playing. */
+.record.is-focus::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid var(--mood-current);
+  box-shadow: 0 0 22px color-mix(in srgb, var(--mood-current) 50%, transparent);
+  pointer-events: none;
+  transition: border-color 320ms ease;
+}
+
+.record.is-focus .record__disc {
+  animation: recordSpin 5.5s linear infinite;
+  animation-play-state: paused;
+}
+
+.record.is-focus.is-playing .record__disc {
+  animation-play-state: running;
+}
+
+.record.is-focus.is-playing::before {
+  animation: ringBreath 2.4s ease-in-out infinite;
+}
+
+@keyframes recordSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes ringBreath {
+  0%, 100% { box-shadow: 0 0 16px color-mix(in srgb, var(--mood-current) 40%, transparent); }
+  50% { box-shadow: 0 0 34px color-mix(in srgb, var(--mood-current) 75%, transparent); }
+}
+
+.record:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orbit,
+  .record { transition-duration: 1ms; transition-delay: 0ms !important; }
+  .record.is-focus .record__disc,
+  .record.is-focus.is-playing::before,
+  .orbit__text { animation: none; }
+}
