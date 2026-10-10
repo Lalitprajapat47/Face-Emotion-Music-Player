@@ -49,6 +49,21 @@ export const useSong = () => {
         setSong(selectedSong)
     }
 
-    return ({ loading, song, songList, handleGetSong, handleGetSongList, playSong, isPlaying, setIsPlaying })
+    // Position of the currently selected song inside the browsable list
+    // (-1 if it isn't part of it).
+    const activeIndex = (songList || []).findIndex((item) =>
+        item._id ? item._id === song?._id : item.url === song?.url
+    )
+
+    // Move to the previous (-1) or next (+1) record and play it. Stops at
+    // either end of the list instead of wrapping around.
+    function stepSong(direction) {
+        if (!songList || songList.length < 2) return;
+        const from = activeIndex === -1 ? 0 : activeIndex
+        const target = Math.min(songList.length - 1, Math.max(0, from + direction))
+        if (target !== activeIndex) playSong(songList[target])
+    }
+
+    return ({ loading, song, songList, handleGetSong, handleGetSongList, playSong, stepSong, activeIndex, isPlaying, setIsPlaying })
 
 }
