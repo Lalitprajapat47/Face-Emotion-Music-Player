@@ -59,7 +59,7 @@ export default function AmbientBackground() {
 
       const moodKey =
         document
-          .querySelector(".expression-card")
+          .querySelector(".porthole-unit")
           ?.getAttribute("data-mood") || "detecting";
       const moodColor = MOOD_HEX[moodKey] || MOOD_HEX.detecting;
 
