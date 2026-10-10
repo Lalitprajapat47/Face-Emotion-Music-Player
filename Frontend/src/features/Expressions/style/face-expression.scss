@@ -24,12 +24,11 @@
    page instead of a small boxed card. */
 .porthole {
   position: relative;
-  width: 260px;
-  height: 260px;
-}
-
-@media (max-width: 640px) {
-  .porthole { width: 190px; height: 190px; }
+  width: var(--porthole-size, 260px);
+  height: var(--porthole-size, 260px);
+  transition:
+    width 600ms cubic-bezier(.2, .8, .2, 1),
+    height 600ms cubic-bezier(.2, .8, .2, 1);
 }
 
 /* Rotating vinyl-groove ring, colored by the detected mood */
@@ -215,4 +214,95 @@
 
 .needle-btn.processing .needle-btn__scan::before {
   animation: scanPing 700ms ease-out infinite;
+}
+
+/* ── Head-turn cues ───────────────────────────────────────────────────────
+   Two chevrons flank the porthole. --yaw (-1…1) is written straight onto the
+   .porthole element every frame from JS (no React re-render), so they act as
+   a live meter of how far the head has turned. */
+.porthole__cue {
+  position: absolute;
+  top: 50%;
+  margin-top: -22px;
+  font-size: 44px;
+  line-height: 1;
+  font-weight: 300;
+  color: var(--mood-current);
+  opacity: 0;
+  pointer-events: none;
+  text-shadow: 0 0 18px color-mix(in srgb, var(--mood-current) 70%, transparent);
+}
+
+.porthole__cue--prev { left: -46px; }
+.porthole__cue--next { right: -46px; }
+
+.porthole--head .porthole__cue--next { opacity: clamp(0, var(--yaw, 0), 1); }
+.porthole--head .porthole__cue--prev { opacity: clamp(0, calc(var(--yaw, 0) * -1), 1); }
+
+.porthole__cue.flash {
+  animation: cueFlash 450ms ease-out;
+}
+
+@keyframes cueFlash {
+  0% { opacity: 1; transform: scale(1.35); }
+  100% { opacity: 0; transform: scale(1); }
+}
+
+/* ── Head-control switch ─────────────────────────────────────────────── */
+.head-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 100%;
+  padding: 2px 6px;
+  border: 0;
+  background: none;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 160ms ease;
+}
+
+.head-toggle:hover { color: var(--text-primary); }
+
+.head-toggle__track {
+  position: relative;
+  width: 26px;
+  height: 15px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  transition: background 200ms ease;
+  flex-shrink: 0;
+}
+
+.head-toggle__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 200ms cubic-bezier(.2, .8, .2, 1);
+}
+
+.head-toggle.is-on .head-toggle__track {
+  background: var(--mood-current);
+}
+
+.head-toggle.is-on .head-toggle__thumb {
+  transform: translateX(11px);
+}
+
+.head-toggle__hint {
+  color: var(--mood-current);
+  transition: color 320ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .porthole__cue.flash { animation: none; }
 }
