@@ -1,0 +1,84 @@
+.sensor {
+  position: relative;
+  width: min(360px, 100%);
+  aspect-ratio: 4 / 3;
+  border-radius: 22px;
+  overflow: hidden;
+  background: #15171c;
+  box-shadow:
+    0 26px 60px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+  /* lets the browser morph this one element between its two layouts */
+  view-transition-name: sensor;
+}
+
+/* After the mix is made: a small self-view docked top-right, like FaceTime */
+.sensor--pip {
+  position: fixed;
+  top: 14px;
+  right: 20px;
+  z-index: 60;
+  width: 164px;
+  border-radius: 14px;
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+@media (max-width: 640px) {
+  .sensor--pip { width: 116px; right: 12px; top: 10px; }
+}
+
+.sensor__video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scaleX(-1); /* mirrored, so it feels like a mirror */
+}
+
+.sensor__status {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 14px;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  background: rgba(12, 13, 17, 0.72);
+}
+
+.sensor--pip .sensor__status { font-size: 10.5px; padding: 8px; }
+
+/* Head-turn cues: brighten as the head turns (--yaw is written straight
+   onto this element every frame from JS) and flash when a skip fires. */
+.sensor__cue {
+  position: absolute;
+  top: 50%;
+  margin-top: -16px;
+  font-size: 30px;
+  line-height: 1;
+  color: #fff;
+  opacity: 0;
+  pointer-events: none;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+}
+
+.sensor__cue--prev { left: 8px; }
+.sensor__cue--next { right: 8px; }
+
+.sensor.has-head-cues .sensor__cue--next { opacity: clamp(0, var(--yaw, 0), 1); }
+.sensor.has-head-cues .sensor__cue--prev { opacity: clamp(0, calc(var(--yaw, 0) * -1), 1); }
+
+.sensor__cue.flash { animation: sensorCueFlash 450ms ease-out; }
+
+@keyframes sensorCueFlash {
+  0% { opacity: 1; transform: scale(1.3); }
+  100% { opacity: 0; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sensor__cue.flash { animation: none; }
+}
