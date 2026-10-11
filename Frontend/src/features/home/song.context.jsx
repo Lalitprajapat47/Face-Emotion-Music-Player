@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, useRef, useState } from "react";
 
 export const SongContext = createContext();
 
@@ -14,6 +14,10 @@ export const SongContextProvider = ({ children }) => {
   const [songList, setSongList] = useState([]);
   const [isPlaying, setIsPlaying] = useState(false);
 
+  // The <audio> element lives in Player, but the mix page needs to play /
+  // pause it too — so the ref is shared through context.
+  const audioRef = useRef(null);
+
   return (
     <SongContext.Provider
       value={{
@@ -21,6 +25,7 @@ export const SongContextProvider = ({ children }) => {
         loading, setLoading,
         songList, setSongList,
         isPlaying, setIsPlaying,
+        audioRef,
       }}
     >
       {children}
