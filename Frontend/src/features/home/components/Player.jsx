@@ -1,5 +1,4 @@
-import React, { useRef, useState, useEffect, useContext } from 'react'
-import { SongContext } from '../song.context'
+import React, { useRef, useState, useEffect } from 'react'
 import { useSong } from '../hooks/useSong'
 import './player.scss'
 
@@ -13,9 +12,8 @@ const formatTime = (seconds) => {
 }
 
 const Player = () => {
-    const { song, isPlaying, setIsPlaying } = useSong()
+    const { song, isPlaying, setIsPlaying, audioRef, stepSong } = useSong()
 
-    const audioRef = useRef(null)
     const progressRef = useRef(null)
 
     const [currentTime, setCurrentTime] = useState(0)
@@ -47,15 +45,17 @@ const Player = () => {
         }
     }, [song?.url])
 
+    // State follows the <audio> element's own play/pause events (see the
+    // onPlay / onPause props below), so the mix page can control playback
+    // too and everything stays in sync.
     const togglePlay = () => {
         const audio = audioRef.current
         if (!audio) return
-        if (isPlaying) {
-            audio.pause()
+        if (audio.paused) {
+            audio.play().catch(() => {})
         } else {
-            audio.play()
+            audio.pause()
         }
-        setIsPlaying(!isPlaying)
     }
 
     const skip = (secs) => {
@@ -108,6 +108,9 @@ const Player = () => {
     const handleSongEnd = () => {
         setIsPlaying(false)
         setCurrentTime(0)
+        // playlist behaviour: continue with the next song of the mix
+        // (does nothing after the last one)
+        stepSong(1)
     }
 
     const progress = duration ? (currentTime / duration) * 100 : 0
@@ -122,6 +125,8 @@ const Player = () => {
                 onTimeUpdate={handleTimeUpdate}
                 onLoadedMetadata={handleLoadedMetadata}
                 onEnded={handleSongEnd}
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
             />
 
             {/* Poster + Info */}
