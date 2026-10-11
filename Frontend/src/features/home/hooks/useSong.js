@@ -6,10 +6,15 @@ import { SongContext } from "../song.context";
 export const useSong = () => {
     const context = useContext(SongContext)
 
-    const { loading, setLoading, song, setSong, songList, setSongList, isPlaying, setIsPlaying } = context
+    const {
+        loading, setLoading,
+        song, setSong,
+        songList, setSongList,
+        isPlaying, setIsPlaying,
+        audioRef,
+    } = context
 
-    // Default behaviour — unchanged: fetches one song for the mood and
-    // plays it immediately.
+    // Fetches one song for the mood and plays it immediately.
     async function handleGetSong({ mood }) {
         if (!mood) return;
 
@@ -30,20 +35,23 @@ export const useSong = () => {
         }
     }
 
-    // Additional — fetches every song matching the mood so the user can
-    // browse and pick a different one than the auto-played default.
+    // Fetches every song matching the mood and returns them, so the caller
+    // can decide what to do when the list is empty.
     async function handleGetSongList({ mood }) {
-        if (!mood) return;
+        if (!mood) return [];
 
         try {
             const data = await getSongList({ mood })
-            setSongList(data?.songs || [])
+            const songs = data?.songs || []
+            setSongList(songs)
+            return songs
         } catch (error) {
             console.error('Failed to fetch song list:', error)
+            return []
         }
     }
 
-    // Lets the song list (or any other UI) switch the currently playing song.
+    // Switch the currently selected song (Player auto-plays on change).
     function playSong(selectedSong) {
         if (!selectedSong) return;
         setSong(selectedSong)
@@ -55,7 +63,7 @@ export const useSong = () => {
         item._id ? item._id === song?._id : item.url === song?.url
     )
 
-    // Move to the previous (-1) or next (+1) record and play it. Stops at
+    // Move to the previous (-1) or next (+1) song and play it. Stops at
     // either end of the list instead of wrapping around.
     function stepSong(direction) {
         if (!songList || songList.length < 2) return;
@@ -64,6 +72,23 @@ export const useSong = () => {
         if (target !== activeIndex) playSong(songList[target])
     }
 
-    return ({ loading, song, songList, handleGetSong, handleGetSongList, playSong, stepSong, activeIndex, isPlaying, setIsPlaying })
+    // Play / pause whatever is loaded in the Player.
+    function togglePlayback() {
+        const audio = audioRef?.current
+        if (!audio) return;
+        if (audio.paused) {
+            audio.play().catch(() => {})
+        } else {
+            audio.pause()
+        }
+    }
+
+    return ({
+        loading, song, songList,
+        handleGetSong, handleGetSongList,
+        playSong, stepSong, activeIndex,
+        isPlaying, setIsPlaying,
+        audioRef, togglePlayback,
+    })
 
 }
