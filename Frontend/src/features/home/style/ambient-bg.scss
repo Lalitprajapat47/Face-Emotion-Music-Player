@@ -7,6 +7,11 @@
   z-index: 0;
   background: #030406;
   overflow: hidden;
+  transition: opacity 600ms ease;
+
+  /* Softer on the mix page, so the tracklist text stays easy to read.
+     Change this one number to taste (1 = full strength). */
+  &.is-dim { opacity: 0.55; }
 
   .ambient-canvas {
     position: absolute;
