@@ -3,6 +3,7 @@ import { flushSync } from 'react-dom';
 import Sensor from '../../Expressions/components/Sensor';
 import { useFaceSensor } from '../../Expressions/hooks/useFaceSensor';
 import Player from '../components/Player';
+import AmbientBackground from '../components/AmbientBackground';
 import MixPage from '../components/MixPage';
 import { useSong } from '../hooks/useSong';
 import '../style/home.scss';
@@ -98,50 +99,55 @@ const Home = () => {
       : 'Looking for your face…';
 
   return (
-    <div className={`app app--${view}`}>
-      <header className="topbar">
-        <span className="topbar__logo">Moodify</span>
-      </header>
+    <>
+      {/* the flowing ribbons; tinted by the current mood, softer on the mix page */}
+      <AmbientBackground mood={accentMood} dim={view === 'mix'} />
 
-      <main className="stage">
-        {view === 'detect' && (
-          <div className="detect__head">
-            <h1 className="detect__title">How are you feeling?</h1>
-            <p className="detect__sub">Look at the camera. We'll pick the music.</p>
-          </div>
-        )}
+      <div className={`app app--${view}`}>
+        <header className="topbar">
+          <span className="topbar__logo">Moodify</span>
+        </header>
 
-        {/* One camera element for the whole page — it never remounts, it
-            just changes size and position between the two screens. */}
-        <Sensor sensor={sensor} variant={view === 'mix' ? 'pip' : 'hero'} />
+        <main className="stage">
+          {view === 'detect' && (
+            <div className="detect__head">
+              <h1 className="detect__title">How are you feeling?</h1>
+              <p className="detect__sub">Look at the camera. We'll pick the music.</p>
+            </div>
+          )}
 
-        {view === 'detect' && (
-          <div className="detect__foot">
-            <p className="detect__caption" key={liveKnown ? liveMood : 'searching'} aria-live="polite">
-              {caption}
-            </p>
+          {/* One camera element for the whole page — it never remounts, it
+              just changes size and position between the two screens. */}
+          <Sensor sensor={sensor} variant={view === 'mix' ? 'pip' : 'hero'} />
 
-            <button
-              type="button"
-              className="cta"
-              onClick={makeMix}
-              disabled={!sensor.isLive || busy}
-            >
-              {busy ? (<><span className="cta__spinner" aria-hidden="true" />Making your mix…</>) : 'Make my mix'}
-            </button>
+          {view === 'detect' && (
+            <div className="detect__foot">
+              <p className="detect__caption" key={liveKnown ? liveMood : 'searching'} aria-live="polite">
+                {caption}
+              </p>
 
-            {hint && <p className="detect__hint" role="status">{hint}</p>}
-            <p className="detect__privacy">Your camera never leaves this device.</p>
-          </div>
-        )}
+              <button
+                type="button"
+                className="cta"
+                onClick={makeMix}
+                disabled={!sensor.isLive || busy}
+              >
+                {busy ? (<><span className="cta__spinner" aria-hidden="true" />Making your mix…</>) : 'Make my mix'}
+              </button>
 
-        {view === 'mix' && mix && (
-          <MixPage mix={mix} onRedo={makeMix} busy={busy} hint={hint} sensor={sensor} />
-        )}
-      </main>
+              {hint && <p className="detect__hint" role="status">{hint}</p>}
+              <p className="detect__privacy">Your camera never leaves this device.</p>
+            </div>
+          )}
 
-      <Player />
-    </div>
+          {view === 'mix' && mix && (
+            <MixPage mix={mix} onRedo={makeMix} busy={busy} hint={hint} sensor={sensor} />
+          )}
+        </main>
+
+        <Player />
+      </div>
+    </>
   );
 };
 
