@@ -1,12 +1,8 @@
 import React, { useEffect, useRef } from "react";
 import "../style/ambient-bg.scss";
 
-// Canvas 2D's fillStyle/strokeStyle cannot resolve CSS var() references —
-// it needs an actual color string. So instead of reading --mood-current via
-// getComputedStyle (which may return the raw "var(--mood-happy)" token
-// rather than a resolved color, depending on the browser), we keep a real
-// JS color map here and read the mood key straight off the DOM attribute
-// that FaceExpression.jsx already sets.
+// Canvas 2D's strokeStyle can't resolve CSS var() references, so the mood
+// colours are kept here as real hex values.
 const MOOD_HEX = {
   happy: "#ff601c",
   sad: "#3b82f6",
@@ -15,73 +11,82 @@ const MOOD_HEX = {
   detecting: "#64748b",
 };
 
-export default function AmbientBackground() {
+// The ribbons are heavily blurred anyway, so the canvas is rendered at half
+// size and scaled up by CSS. Same look, but only a quarter of the pixels to
+// blur every frame — which keeps the face-detection loop smooth.
+const RENDER_SCALE = 0.5;
+
+/**
+ * The flowing, Siri-style ribbon background.
+ *  - mood: key of the colour of the main ribbon (happy / sad / surprised …)
+ *  - dim:  softens the whole layer (used on the mix page so the tracklist
+ *          stays easy to read)
+ */
+export default function AmbientBackground({ mood = "detecting", dim = false }) {
   const canvasRef = useRef(null);
+
+  // The animation loop reads the latest mood from a ref, so changing the
+  // mood never restarts the loop.
+  const moodRef = useRef(mood);
+  useEffect(() => {
+    moodRef.current = mood;
+  }, [mood]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) return undefined;
     const ctx = canvas.getContext("2d");
-    let animId;
+    if (!ctx) return undefined;
+
+    let animId = 0;
     let paused = document.hidden;
-    let w = (canvas.width = window.innerWidth);
-    let h = (canvas.height = window.innerHeight);
+    let w = 0;
+    let h = 0;
 
-    const onResize = () => {
-      w = canvas.width = window.innerWidth;
-      h = canvas.height = window.innerHeight;
+    const resize = () => {
+      w = window.innerWidth;
+      h = window.innerHeight;
+      canvas.width = Math.max(1, Math.round(w * RENDER_SCALE));
+      canvas.height = Math.max(1, Math.round(h * RENDER_SCALE));
     };
-    window.addEventListener("resize", onResize);
+    resize();
+    window.addEventListener("resize", resize);
 
-    // Pause the animation while the tab isn't visible — a full-viewport
-    // blurred canvas running forever in a background tab is pure wasted
-    // battery/CPU.
-    const onVisibility = () => {
-      paused = document.hidden;
-      if (!paused) render();
-    };
-    document.addEventListener("visibilitychange", onVisibility);
-
-    const reduceMotion = window.matchMedia?.(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
+    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
     let t = 0;
 
     const render = () => {
       if (paused) return;
       t += reduceMotion ? 0.002 : 0.012;
+
+      // draw in normal CSS-pixel units; the transform maps them onto the
+      // smaller bitmap
+      ctx.setTransform(RENDER_SCALE, 0, 0, RENDER_SCALE, 0, 0);
       ctx.clearRect(0, 0, w, h);
 
       // Deep Studio Pitch Black Base
       ctx.fillStyle = "#040507";
       ctx.fillRect(0, 0, w, h);
 
-      const moodKey =
-        document
-          .querySelector(".porthole-unit")
-          ?.getAttribute("data-mood") || "detecting";
-      const moodColor = MOOD_HEX[moodKey] || MOOD_HEX.detecting;
+      const moodColor = MOOD_HEX[moodRef.current] || MOOD_HEX.detecting;
 
       ctx.save();
       ctx.globalCompositeOperation = "screen";
 
-      // Multi-layer Apple/Google Siri-style morphing luminous ribbons —
-      // kept subtle: no central round flare blob (that was the "gola jesa
-      // glow" the user asked to remove), and lower blur/alpha so it reads
-      // as gentle ambient motion instead of a bright streak.
       const ribbons = [
         { amp: 45, freq: 0.0018, speed: 1.4, color: moodColor, blur: 40, alpha: 0.48 },
         { amp: 65, freq: 0.0022, speed: -1.1, color: "#ec4899", blur: 34, alpha: 0.3 },
         { amp: 35, freq: 0.003, speed: 1.8, color: "#38bdf8", blur: 28, alpha: 0.32 },
-        { amp: 20, freq: 0.0015, speed: -0.8, color: "#ffffff", blur: 11, alpha: 0.45 }
+        { amp: 20, freq: 0.0015, speed: -0.8, color: "#ffffff", blur: 11, alpha: 0.45 },
       ];
 
       const centerY = h * 0.52;
 
       ribbons.forEach((ribbon, index) => {
         ctx.save();
-        ctx.filter = `blur(${ribbon.blur}px)`;
+        // filter radii are in bitmap pixels, so scale them with the canvas
+        ctx.filter = `blur(${ribbon.blur * RENDER_SCALE}px)`;
         ctx.globalAlpha = ribbon.alpha;
         ctx.beginPath();
 
@@ -103,7 +108,6 @@ export default function AmbientBackground() {
           }
         }
 
-        // Variable line thickness & gradient shading
         ctx.strokeStyle = ribbon.color;
         ctx.lineWidth = index === 3 ? 14 : 48;
         ctx.lineCap = "round";
@@ -117,17 +121,27 @@ export default function AmbientBackground() {
       animId = requestAnimationFrame(render);
     };
 
+    // Pause while the tab is hidden — a full-screen blurred canvas running in
+    // a background tab is wasted battery. Cancelling before restarting makes
+    // sure quick hide/show flips can never leave two loops running.
+    const onVisibility = () => {
+      paused = document.hidden;
+      cancelAnimationFrame(animId);
+      if (!paused) render();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
     if (!paused) render();
 
     return () => {
-      window.removeEventListener("resize", onResize);
+      window.removeEventListener("resize", resize);
       document.removeEventListener("visibilitychange", onVisibility);
       cancelAnimationFrame(animId);
     };
   }, []);
 
   return (
-    <div className="ambient-viewport" aria-hidden="true">
+    <div className={`ambient-viewport ${dim ? "is-dim" : ""}`} aria-hidden="true">
       <canvas ref={canvasRef} className="ambient-canvas" />
       <div className="tactile-frost-texture" />
       <div className="vignette-radial" />
