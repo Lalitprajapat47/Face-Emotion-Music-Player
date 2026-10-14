@@ -1,6 +1,6 @@
 # Moodify — Face Expression Driven Music Player
 
-Moodify is a demo web app that detects facial expressions using MediaPipe and suggests/plays songs based on detected moods. It includes a React frontend (Vite) and an Express + MongoDB backend with Redis for token blacklist and ImageKit for storage.
+Moodify is a demo web app that detects facial expressions using MediaPipe and suggests/plays songs based on detected moods. It includes a React frontend (Vite) and an Express + MongoDB backend with Redis for token blacklist and ImageKit for storage
 
 ## Live deployment
 
