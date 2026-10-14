@@ -133,3 +133,6 @@ All protected routes use the `auth.middleware` which expects a JWT in a `token` 
 ## Contact
 
 If you want me to expand this README with setup screenshots, Docker compose for services (Mongo+Redis), or generate a `.env.example`, say which option and I'll add it.
+
+
+i cann
