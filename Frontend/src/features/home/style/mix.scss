@@ -197,6 +197,14 @@
 .ghost:hover:not(:disabled) { border-color: #fff; transform: scale(1.03); }
 .ghost:disabled { opacity: 0.6; cursor: default; }
 
+.ghost--icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ghost--icon svg { width: 15px; height: 15px; }
+
 .switch {
   display: inline-flex;
   align-items: center;
