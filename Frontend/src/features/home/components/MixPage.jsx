@@ -1,5 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { useSong } from '../hooks/useSong';
+import { renderCoverBlob, downloadBlob } from '../utils/renderCover';
 import '../style/mix.scss';
 
 const cap = (s = '') => s.charAt(0).toUpperCase() + s.slice(1);
@@ -14,6 +15,14 @@ const PauseIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
     <rect x="6" y="4" width="4" height="16" rx="1" />
     <rect x="14" y="4" width="4" height="16" rx="1" />
+  </svg>
+);
+
+const DownloadIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M12 4v11" />
+    <path d="M7 11l5 5 5-5" />
+    <path d="M5 20h14" />
   </svg>
 );
 
@@ -32,6 +41,9 @@ function daypart(hour) {
  */
 export default function MixPage({ mix, onRedo, busy, hint, sensor }) {
   const { songList, isPlaying, activeIndex, playSong, togglePlayback } = useSong();
+
+  const mixRef = useRef(null);
+  const [saving, setSaving] = useState(false);
 
   const title = `${cap(mix.mood)} Mix`;
   const count = songList.length;
@@ -55,8 +67,29 @@ export default function MixPage({ mix, onRedo, busy, hint, sensor }) {
 
   const mixPlaying = activeIndex !== -1 && isPlaying;
 
+  // Saves the cover (your face + the title) as a 1080×1080 PNG. The colours
+  // are read from the page's own CSS, so the file always matches what you see.
+  const saveCover = async () => {
+    if (saving || !mixRef.current) return;
+    setSaving(true);
+    try {
+      const css = getComputedStyle(mixRef.current);
+      const blob = await renderCoverBlob({
+        snapshot: mix.snapshot,
+        title,
+        light: css.getPropertyValue('--mix-light'),
+        dark: css.getPropertyValue('--mix-dark'),
+      });
+      downloadBlob(blob, `${title.replace(/\s+/g, '-')}-Moodify.png`);
+    } catch (err) {
+      console.error('Could not save the cover:', err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
-    <section className="mix" data-mood={mix.mood}>
+    <section className="mix" data-mood={mix.mood} ref={mixRef}>
       <div className="mix__inner">
         <div className="mix__hero">
           <div className={`cover ${mix.snapshot ? '' : 'cover--empty'}`} aria-hidden="true">
@@ -97,6 +130,11 @@ export default function MixPage({ mix, onRedo, busy, hint, sensor }) {
 
           <button type="button" className="ghost" onClick={onRedo} disabled={busy}>
             {busy ? 'Reading your face…' : 'Detect again'}
+          </button>
+
+          <button type="button" className="ghost ghost--icon" onClick={saveCover} disabled={saving}>
+            <DownloadIcon />
+            {saving ? 'Saving…' : 'Save cover'}
           </button>
 
           <button
