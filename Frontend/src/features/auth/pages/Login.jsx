@@ -1,50 +1,89 @@
-import React from 'react'
-import { Link } from 'react-router'
-import '../style/login.scss'
+import React, { useEffect, useState } from 'react'
+import { Link, Navigate } from 'react-router'
+import AuthShell from '../components/AuthShell'
+import PasswordField from '../components/PasswordField'
 import { useAuth } from '../hooks/useAuth'
-import { useNavigate } from 'react-router'
-import { useState } from 'react'
+import { validateLogin } from '../utils/validate'
+import '../style/auth.scss'
 
 const Login = () => {
-
-  const { loading, handleLogin } = useAuth()
+  const { user, ready, loading, handleLogin } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const navigate = useNavigate()
+  const [errors, setErrors] = useState({})
+  const [formError, setFormError] = useState('')
+
+  useEffect(() => {
+    document.title = 'Log in · Moodify'
+  }, [])
+
+  // wait for the first session check, and don't show the form to someone who is already in
+  if (!ready) return null
+  if (user) return <Navigate to="/" replace />
 
   async function handleSubmit(e) {
     e.preventDefault()
-    await handleLogin({ email, password })
-    navigate('/')
+    if (loading) return
+
+    setFormError('')
+    const found = validateLogin({ email, password })
+    setErrors(found)
+    if (Object.keys(found).length) return
+
+    const result = await handleLogin({ email: email.trim(), password })
+    // on success `user` is set and the guard above redirects to the app
+    if (!result.ok) setFormError(result.message)
   }
 
   return (
-    <main className="auth-page login-page">
-      <section className="auth-card">
-        <div className="auth-card__content">
-          <div className="auth-card__hero">
-            <p className="eyebrow">Welcome back</p>
-            <h1>Sign in to Moodify</h1>
-            <p>Analyze facial expressions and keep your mood insights moving forward.</p>
-          </div>
+    <AuthShell>
+      <div className="auth__panel">
+        <h1 className="auth__title">Log in to Moodify</h1>
+        <p className="auth__sub">Welcome back. Your next mix is one look away.</p>
 
-          <form className="auth-form" onSubmit={handleSubmit}>
+        <form className="auth__form" onSubmit={handleSubmit} noValidate>
+          <div className="field">
             <label htmlFor="email">Email address</label>
             <input
-              type="email" id="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              autoComplete="email"
+              autoFocus
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              aria-invalid={errors.email ? 'true' : 'false'}
+              aria-describedby={errors.email ? 'email-error' : undefined}
+            />
+            {errors.email && <p className="field__error" id="email-error">{errors.email}</p>}
+          </div>
 
+          <div className="field">
             <label htmlFor="password">Password</label>
-            <input type="password" id="password" placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <PasswordField
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+              placeholder="Your password"
+              invalid={Boolean(errors.password)}
+              describedBy={errors.password ? 'password-error' : undefined}
+            />
+            {errors.password && <p className="field__error" id="password-error">{errors.password}</p>}
+          </div>
 
-            <button type="submit">Login</button>
+          {formError && <p className="auth__alert" role="alert">{formError}</p>}
 
-            <p className="auth-form__footer">
-              New here? <Link to="/register">Create an account</Link>
-            </p>
-          </form>
-        </div>
-      </section>
-    </main>
+          <button type="submit" className="auth__submit" disabled={loading}>
+            {loading ? (<><span className="auth__spinner" aria-hidden="true" />Logging in…</>) : 'Log in'}
+          </button>
+        </form>
+
+        <p className="auth__switch">
+          Don't have an account? <Link to="/register">Sign up for Moodify</Link>
+        </p>
+      </div>
+    </AuthShell>
   )
 }
 
