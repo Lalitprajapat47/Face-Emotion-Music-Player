@@ -5,6 +5,7 @@ import { useFaceSensor } from '../../Expressions/hooks/useFaceSensor';
 import Player from '../components/Player';
 import AmbientBackground from '../components/AmbientBackground';
 import MixPage from '../components/MixPage';
+import UserMenu from '../components/UserMenu';
 import { useSong } from '../hooks/useSong';
 import '../style/home.scss';
 
@@ -106,6 +107,7 @@ const Home = () => {
       <div className={`app app--${view}`}>
         <header className="topbar">
           <span className="topbar__logo">Moodify</span>
+          <UserMenu />
         </header>
 
         <main className="stage">
