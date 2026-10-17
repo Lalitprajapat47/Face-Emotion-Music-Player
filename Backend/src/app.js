@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const cookieParser = require("cookie-parser")
 const cors = require('cors');
 
@@ -48,6 +49,20 @@ const songRoutes = require('./routes/song.routes')
 app.use('/api/songs', songRoutes)
 
 app.use('/api/auth', authRoutes)
+
+// Single-page app: any other page-style GET (/login, /register, a refresh on /,
+// …) gets index.html so the React router can take over. Without this, opening
+// or refreshing /login on the deployed site answers "Cannot GET /login".
+// API calls and requests for files with an extension (.js, .css, .png …) are
+// left alone, so a missing asset is still a real 404.
+app.use((req, res, next) => {
+    if (req.method !== 'GET' || req.path.startsWith('/api') || path.extname(req.path)) {
+        return next()
+    }
+    res.sendFile(path.join(process.cwd(), 'public', 'index.html'), (err) => {
+        if (err && !res.headersSent) next()
+    })
+})
 
 // Last stop for anything that throws: clean JSON, and no stack traces or
 // internal messages leaked to the browser in production.
