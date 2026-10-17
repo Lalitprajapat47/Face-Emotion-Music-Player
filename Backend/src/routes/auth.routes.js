@@ -11,6 +11,7 @@ router.post('/login', loginLimiter, validateLogin, authController.loginUser)
 
 router.get('/get-me', authMiddleware, authController.getMe)
 
-router.get('/logout', authController.logoutUser)
+// the frontend logs out with POST; GET is kept so older clients keep working
+router.route('/logout').get(authController.logoutUser).post(authController.logoutUser)
 
 module.exports = router;
