@@ -12,7 +12,7 @@ const formatTime = (seconds) => {
 }
 
 const Player = () => {
-    const { song, isPlaying, setIsPlaying, audioRef, stepSong } = useSong()
+    const { song, isPlaying, setIsPlaying, audioRef, stepSong, songList, activeIndex } = useSong()
 
     const progressRef = useRef(null)
 
@@ -113,6 +113,26 @@ const Player = () => {
         stepSong(1)
     }
 
+    // ── previous / next track (only meaningful while a mix is loaded) ──
+    const queueSize = songList?.length || 0
+    const hasNext = activeIndex !== -1 && activeIndex < queueSize - 1
+    const hasPrev = activeIndex > 0
+    // "Previous" works like in Spotify: more than 3 seconds in, it restarts the
+    // current song; before that it goes back one track.
+    const canPrev = hasPrev || currentTime > 3
+
+    const goPrev = () => {
+        const audio = audioRef.current
+        if (audio && audio.currentTime > 3) {
+            audio.currentTime = 0
+            setCurrentTime(0)
+            return
+        }
+        stepSong(-1)
+    }
+
+    const goNext = () => stepSong(1)
+
     const progress = duration ? (currentTime / duration) * 100 : 0
 
     if (!song) return null
@@ -192,6 +212,20 @@ const Player = () => {
                     <span>5s</span>
                 </button>
 
+                {/* Previous track */}
+                <button
+                    className="player__btn player__btn--track"
+                    onClick={goPrev}
+                    disabled={!canPrev}
+                    title="Previous"
+                    aria-label="Previous"
+                >
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+                        <path d="M6 5h2v14H6z"/>
+                        <path d="M20 5v14L9 12z"/>
+                    </svg>
+                </button>
+
                 {/* Play / Pause */}
                 <button className="player__btn player__btn--play" onClick={togglePlay} title={isPlaying ? 'Pause' : 'Play'}>
                     {isPlaying ? (
@@ -204,6 +238,20 @@ const Player = () => {
                             <path d="M8 5.14v14l11-7-11-7z"/>
                         </svg>
                     )}
+                </button>
+
+                {/* Next track */}
+                <button
+                    className="player__btn player__btn--track"
+                    onClick={goNext}
+                    disabled={!hasNext}
+                    title="Next"
+                    aria-label="Next"
+                >
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+                        <path d="M16 5h2v14h-2z"/>
+                        <path d="M4 5v14l11-7z"/>
+                    </svg>
                 </button>
 
                 {/* Forward 5s */}
