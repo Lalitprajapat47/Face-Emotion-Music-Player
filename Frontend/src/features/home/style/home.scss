@@ -18,6 +18,14 @@
   padding: 0 28px;
 }
 
+/* on the mix page the small camera window sits top-right, so the account
+   menu steps in front of it (window 164px + 20px gap + breathing room) */
+.app--mix .topbar { padding-right: 204px; }
+
+@media (max-width: 640px) {
+  .app--mix .topbar { padding-right: 140px; }
+}
+
 .topbar__logo {
   font-size: 19px;
   font-weight: 800;
