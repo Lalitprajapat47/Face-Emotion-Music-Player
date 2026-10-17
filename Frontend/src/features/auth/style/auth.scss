@@ -1,0 +1,234 @@
+/* Login + register + the "checking your session" screen.
+   Same language as the app: big tight type, one white pill button,
+   restrained inputs, the ribbon background softened behind it. */
+
+.auth {
+  position: relative;
+  z-index: 1;                 /* above the fixed ribbon background */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.auth__top {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+}
+
+.auth__logo {
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  color: #fff;
+  text-decoration: none;
+}
+
+.auth__main {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: 24px 20px 56px;
+}
+
+.auth__panel {
+  width: min(380px, 100%);
+  animation: authIn 420ms cubic-bezier(.2, .8, .2, 1) both;
+}
+
+@keyframes authIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.auth__title {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 6vw, 36px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.08;
+  color: #fff;
+}
+
+.auth__sub {
+  margin-top: 10px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.auth__form {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ── fields ──────────────────────────────────────────────────────────── */
+.field label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.field input {
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font: 500 15px/1 var(--font-body);
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+}
+
+.field input::placeholder { color: rgba(255, 255, 255, 0.4); }
+.field input:hover { border-color: rgba(255, 255, 255, 0.4); }
+
+.field input:focus {
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.09);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.12);
+}
+
+.field input[aria-invalid="true"] { border-color: #ff8a8a; }
+
+/* keep Chrome's autofill from turning the field white */
+.field input:-webkit-autofill,
+.field input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #fff;
+  caret-color: #fff;
+  box-shadow: 0 0 0 1000px #1a1c22 inset;
+  transition: background-color 9999s ease-out;
+}
+
+.field__wrap { position: relative; }
+.field__wrap input { padding-right: 48px; }
+
+.field__toggle {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: color 150ms ease, background 150ms ease;
+}
+
+.field__toggle:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
+.field__toggle svg { width: 19px; height: 19px; }
+
+.field__error {
+  margin-top: 7px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: #ff9b9b;
+}
+
+.field__hint {
+  margin-top: 7px;
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* server / network problems */
+.auth__alert {
+  padding: 11px 14px;
+  border: 1px solid rgba(255, 120, 120, 0.3);
+  border-radius: 10px;
+  background: rgba(255, 90, 90, 0.1);
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: #ffb4b4;
+}
+
+/* ── button + links ──────────────────────────────────────────────────── */
+.auth__submit {
+  height: 50px;
+  margin-top: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  color: #0b0b0d;
+  font: 700 15px/1 var(--font-body);
+  cursor: pointer;
+  transition: transform 160ms ease, opacity 160ms ease, box-shadow 200ms ease;
+}
+
+.auth__submit:hover:not(:disabled) {
+  transform: scale(1.02);
+  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.12);
+}
+
+.auth__submit:disabled { opacity: 0.6; cursor: default; }
+
+.auth__spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 0, 0, 0.18);
+  border-top-color: #0b0b0d;
+  animation: authSpin 700ms linear infinite;
+}
+
+@keyframes authSpin { to { transform: rotate(360deg); } }
+
+.auth__switch {
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.auth__switch a {
+  color: #fff;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.auth__foot {
+  padding: 0 20px 22px;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ── "checking your session" screen ──────────────────────────────────── */
+.boot {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+}
+
+.boot__spinner {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(255, 255, 255, 0.15);
+  border-top-color: #fff;
+  animation: authSpin 800ms linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth__panel { animation: none; }
+  .auth__spinner, .boot__spinner { animation-duration: 2s; }
+}
