@@ -199,7 +199,7 @@ docker run -p 3000:3000 --env-file Backend/.env -e NODE_ENV=production moodify
 - Mood detection is rule-based (thresholds on blendshape scores in `Frontend/src/features/Expressions/utils/utils.js`), so lighting, glasses and camera angle matter.
 - Only three moods have songs, and the library is whatever you upload.
 - Developed and tried in Chrome. The page transition into the mix uses the View Transitions API and falls back to a plain switch where it isn't available.
-- There is no automated test suite in the repository yet.
+- There no automated test suite in the repository yet.
 
 ## Roadmap
 
