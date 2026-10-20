@@ -4,7 +4,7 @@
 
 Moodify reads your facial expression in the browser, works out your mood, and builds a "mood mix" from the songs tagged with it: a Spotify-style playlist page whose cover is your own face. You can even skip tracks by turning your head.
 
-**Live demo:** https://face-emotion-music-player.onrender.com
+**Live demo:** 
 
 <!--
   Add screenshots here once you have them, e.g.:
