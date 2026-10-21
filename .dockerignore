@@ -1,2 +1,15 @@
-.env
-node_modules
+# Secrets and local config must never end up inside an image.
+# NOTE: unlike .gitignore, a bare ".env" or "node_modules" here only matches at
+# the ROOT of the build context. "**/" makes it match Backend/ and Frontend/ too.
+**/.env
+**/.env.*
+!**/.env.example
+
+# recreated inside the image by `npm install` / `npm run build`
+**/node_modules
+**/dist
+
+.git
+.gitignore
+docs
+*.md
