@@ -1,6 +1,6 @@
 # Moodify
 
-**Look at the camera. Get a playlist that matches your face.**
+**Look at the camera. Get a playlist that matches your face**
 
 Moodify reads your facial expression in the browser, works out your mood, and builds a "mood mix" from the songs tagged with it: a Spotify-style playlist page whose cover is your own face. You can even skip tracks by turning your head.
 
