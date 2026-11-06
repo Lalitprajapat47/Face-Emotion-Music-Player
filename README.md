@@ -210,4 +210,4 @@ docker run -p 3000:3000 --env-file Backend/.env -e NODE_ENV=production moodify
 
 ## Acknowledgements
 
-[MediaPipe](https://ai.google.dev/edge/mediapipe) for face landmark detection, [ImageKit](https://imagekit.io) for media storage, and the [Inter](https://rsms.me/inter/) typeface.
+[MediaPipe](https://ai.google.dev/edge/mediapipe) for face landmark detection, [ImageKit](https://imagekit.io) for media storage, and the [Inter](https://rsms.me/inter/) typeface
