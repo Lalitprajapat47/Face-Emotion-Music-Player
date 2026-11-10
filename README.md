@@ -4,7 +4,7 @@
 
 Moodify reads your facial expression in the browser, works out your mood, and builds a "mood mix" from the songs tagged with it: a Spotify-style playlist page whose cover is your own face. You can even skip tracks by turning your head.
 
-**Live demo:** 
+**Live demo:** https://face-emotion-music-player.onrender.com
 
 <!--
   Add screenshots here once you have them, e.g.:
@@ -117,9 +117,10 @@ Register in the app, add a few songs (next section), then look at the camera and
 | `ADMIN_EMAILS` | for uploads | Comma-separated emails allowed to upload songs. Empty means nobody can |
 | `NODE_ENV` | in production | Set to `production` when deployed: secure cookies, proxy trust, no error details in responses |
 | `PORT` | no | Defaults to `3000` |
+| `TRUST_PROXY` | no | How many proxies sit in front of the app (default `1`). Use `2` when Vercel forwards requests to your backend, see [Vercel](#deploying-the-frontend-on-vercel) |
 | `IMAGEKIT_PUBLIC_KEY`, `IMAGEKIT_URL_ENDPOINT` | no | Optional ImageKit settings |
 | `IMAGEKIT_UPLOAD_TIMEOUT` | no | Upload timeout in ms (default `120000`) |
-| `FRONTEND_URL`, `CLIENT_URL` | no | Extra allowed browser origins (CORS) |
+| `FRONTEND_URL`, `CLIENT_URL` | no | Extra allowed browser origins (CORS), comma-separated. Set `FRONTEND_URL` to your Vercel URL when the frontend is hosted there |
 
 `.env` is git-ignored; commit only `.env.example`. The server refuses to start if `MONGO_URI` or `JWT_SECRET` is missing.
 
@@ -154,14 +155,17 @@ All errors look like `{ "message": "..." }`.
 | `GET` | `/api/songs/list?mood=` | cookie | Up to 20 songs for the mood |
 | `GET` | `/api/songs?mood=` | cookie | One song for the mood |
 | `POST` | `/api/songs` | admin | Upload an MP3 (`multipart/form-data`: `song`, `mood`) |
+| `GET` | `/api/health` | none | `{ ok, ip }`: liveness check; `ip` is the address the server believes the caller has |
 
-Rules: username 3–30 characters; valid email; password 8–128 characters. Login allows 10 failed attempts per 15 minutes per IP; registration allows 10 requests per hour per IP.
+Rules: username 3–30 characters; valid email; password 8–128 characters. Login allows 10 failed attempts per 15 minutes per IP, and also 10 per account (email) whatever the IP; registration allows 10 requests per hour per IP.
 
 ## Security
 
 - Passwords are hashed with bcrypt and are never returned by the API.
 - The session is a JWT in an HTTP-only cookie (`Secure` and `SameSite=None` in production). The algorithm is pinned to HS256.
 - Logout blacklists the token in Redis for as long as it would have stayed valid.
+- Login is throttled per IP **and** per account, so faking `X-Forwarded-For` doesn't help someone guess one account's password.
+- API responses are sent with `Cache-Control: no-store`, so no CDN or browser keeps user-specific data.
 - Auth routes are rate-limited and validate their input. Only plain strings are accepted, which blocks NoSQL-operator payloads.
 - Song upload requires an admin and runs *before* the file is read. It accepts MP3 only, with a size limit, and file names taken from tags are sanitised.
 - In production, error responses never include stack traces or internal messages.
@@ -181,6 +185,24 @@ docker run -p 3000:3000 --env-file Backend/.env -e NODE_ENV=production moodify
 - Behind a proxy such as Render, the app trusts one proxy hop so rate limits apply per visitor.
 - Pages like `/login` are served by a SPA fallback, so refreshing them works.
 
+## Deploying the frontend on Vercel
+
+The backend stays on a host that can run a long-lived Express server (the Docker image on Render works). Vercel serves the React app and forwards `/api/*` to that backend, so the browser sees a single origin and the login cookie stays first-party.
+
+**Why not run the API on Vercel too?** Vercel Functions reject request bodies larger than 4.5 MB, and song uploads can be 10 MB. The API also keeps MongoDB and Redis connections open and keeps rate-limit counters in memory, which suit a normal server better than short-lived functions.
+
+1. In `Frontend/vercel.json`, replace the host in the first rewrite with your backend's URL.
+2. In Vercel choose **Add New → Project**, import the repo and set **Root Directory** to `Frontend`. The Vite preset (`npm run build`, output `dist`) is detected automatically. No environment variables are needed, so leave `VITE_API_URL` unset.
+3. On the backend host set `FRONTEND_URL=https://<your-project>.vercel.app`, `TRUST_PROXY=2` and `NODE_ENV=production`, then redeploy it.
+4. Open `https://<your-project>.vercel.app/api/health`. `ip` should be your own public IP; if it shows another address, adjust `TRUST_PROXY`.
+5. Upload songs against the backend's own URL (`https://<backend>/api/songs`), not the Vercel one.
+
+Notes:
+- The backend sends `Cache-Control: no-store`, and `vercel.json` switches rewrite caching off, because newer Vercel projects may cache responses from external rewrites.
+- Preview deployments get their own URLs. Add them to `FRONTEND_URL` (comma-separated) if login should work there.
+- On a free tier the backend can fall asleep. The first request after a quiet period may be slow or fail; an uptime pinger on `/api/health` keeps it awake.
+- People can still call the backend's own URL directly. The per-account login limit covers that case.
+
 ## Troubleshooting
 
 | Problem | Fix |
@@ -191,6 +213,9 @@ docker run -p 3000:3000 --env-file Backend/.env -e NODE_ENV=production moodify
 | Upload says `401` | Log in first (Postman or curl need the cookie) |
 | Upload says `422` | The MP3 has no ID3 title or embedded cover |
 | `429 Too many …` | Wait about 15 minutes, or restart the backend in development |
+| Everyone gets `429` at the same time | The server sees Vercel's IP for every visitor. Set `TRUST_PROXY=2` and check `/api/health` |
+| `403 Origin not allowed` on Vercel | Add your Vercel URL to `FRONTEND_URL` on the backend and redeploy it |
+| First request after a quiet period is slow or fails | A sleeping free-tier backend is waking up. Retry, or ping `/api/health` every few minutes |
 | Songs return `401` in development | `VITE_API_URL` must point at the same backend you logged in to (or be unset) |
 | Upload times out | Raise `IMAGEKIT_UPLOAD_TIMEOUT` and check your connection to ImageKit |
 
@@ -199,7 +224,7 @@ docker run -p 3000:3000 --env-file Backend/.env -e NODE_ENV=production moodify
 - Mood detection is rule-based (thresholds on blendshape scores in `Frontend/src/features/Expressions/utils/utils.js`), so lighting, glasses and camera angle matter.
 - Only three moods have songs, and the library is whatever you upload.
 - Developed and tried in Chrome. The page transition into the mix uses the View Transitions API and falls back to a plain switch where it isn't available.
-- There no automated test suite in the repository yet.
+- There is no automated test suite in the repository yet.
 
 ## Roadmap
 
