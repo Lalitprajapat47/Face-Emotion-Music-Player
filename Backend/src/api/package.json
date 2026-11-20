@@ -1,0 +1,6 @@
+{
+  "name": "moodify",
+  "private": true,
+  "description": "Root manifest for Vercel. The real packages live in Backend/ and Frontend/ (see vercel.json installCommand).",
+  "engines": { "node": "22.x" }
+}
