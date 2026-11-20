@@ -1,10 +1,10 @@
 # Moodify
 
-**Look at the camera. Get a playlist that matches your face**
+**Look at the camera. Get a playlist that matches your face.**
 
 Moodify reads your facial expression in the browser, works out your mood, and builds a "mood mix" from the songs tagged with it: a Spotify-style playlist page whose cover is your own face. You can even skip tracks by turning your head.
 
-**Live demo:** https://face-emotion-music-player.onrender.com.
+**Live demo:** https://face-emotion-music-player.onrender.com
 
 <!--
   Add screenshots here once you have them, e.g.:
@@ -72,6 +72,8 @@ flowchart LR
 │       ├── Expressions/          camera + MediaPipe (useFaceSensor hook, Sensor view)
 │       ├── home/                 mix page, player, song context, background, user menu
 │       └── shared/               global styles
+├── api/index.js                  Vercel entry: wraps the Express app as a serverless function
+├── vercel.json                   Vercel build and routing config
 └── dockerfile                    one image: builds the frontend, serves it from Express
 ```
 
@@ -117,10 +119,12 @@ Register in the app, add a few songs (next section), then look at the camera and
 | `ADMIN_EMAILS` | for uploads | Comma-separated emails allowed to upload songs. Empty means nobody can |
 | `NODE_ENV` | in production | Set to `production` when deployed: secure cookies, proxy trust, no error details in responses |
 | `PORT` | no | Defaults to `3000` |
-| `TRUST_PROXY` | no | How many proxies sit in front of the app (default `1`). Use `2` when Vercel forwards requests to your backend, see [Vercel](#deploying-the-frontend-on-vercel) |
+| `TRUST_PROXY` | no | How many proxies sit in front of the app (default `1`, which is right for Vercel and Render) |
+| `REDIS_TLS` | no | Set to `true` for Redis providers that require TLS (for example Upstash) |
+| `RATE_LIMIT_STORE` | no | `redis` or `memory`. Default: `redis` in production, `memory` in development |
 | `IMAGEKIT_PUBLIC_KEY`, `IMAGEKIT_URL_ENDPOINT` | no | Optional ImageKit settings |
 | `IMAGEKIT_UPLOAD_TIMEOUT` | no | Upload timeout in ms (default `120000`) |
-| `FRONTEND_URL`, `CLIENT_URL` | no | Extra allowed browser origins (CORS), comma-separated. Set `FRONTEND_URL` to your Vercel URL when the frontend is hosted there |
+| `FRONTEND_URL`, `CLIENT_URL` | no | Extra allowed browser origins (CORS), comma-separated. Requests from the app's own domain are always allowed, so you don't need these on Vercel |
 
 `.env` is git-ignored; commit only `.env.example`. The server refuses to start if `MONGO_URI` or `JWT_SECRET` is missing.
 
@@ -185,23 +189,26 @@ docker run -p 3000:3000 --env-file Backend/.env -e NODE_ENV=production moodify
 - Behind a proxy such as Render, the app trusts one proxy hop so rate limits apply per visitor.
 - Pages like `/login` are served by a SPA fallback, so refreshing them works.
 
-## Deploying the frontend on Vercel
+## Deploying on Vercel
 
-The backend stays on a host that can run a long-lived Express server (the Docker image on Render works). Vercel serves the React app and forwards `/api/*` to that backend, so the browser sees a single origin and the login cookie stays first-party.
+The whole app runs as **one Vercel project**. The React build is served from Vercel's CDN, and every `/api/*` request goes to `api/index.js`, a serverless function that wraps the same Express app. Everything shares one domain, so the login cookie is first-party and there is no CORS to set up.
 
-**Why not run the API on Vercel too?** Vercel Functions reject request bodies larger than 4.5 MB, and song uploads can be 10 MB. The API also keeps MongoDB and Redis connections open and keeps rate-limit counters in memory, which suit a normal server better than short-lived functions.
+**Before you start.** Vercel has no fixed IP address, so your services must be reachable from the internet:
+- **MongoDB Atlas:** under Network Access, allow connections from anywhere (`0.0.0.0/0`).
+- **Redis:** use one that is reachable from outside (Redis Cloud, Upstash, ...). Upstash needs `REDIS_TLS=true`. A Redis on a private network, such as Render's internal URL, will not work.
 
-1. In `Frontend/vercel.json`, replace the host in the first rewrite with your backend's URL.
-2. In Vercel choose **Add New → Project**, import the repo and set **Root Directory** to `Frontend`. The Vite preset (`npm run build`, output `dist`) is detected automatically. No environment variables are needed, so leave `VITE_API_URL` unset.
-3. On the backend host set `FRONTEND_URL=https://<your-project>.vercel.app`, `TRUST_PROXY=2` and `NODE_ENV=production`, then redeploy it.
-4. Open `https://<your-project>.vercel.app/api/health`. `ip` should be your own public IP; if it shows another address, adjust `TRUST_PROXY`.
-5. Upload songs against the backend's own URL (`https://<backend>/api/songs`), not the Vercel one.
+**Steps**
+1. In Vercel choose **Add New → Project** and import the repo. Leave **Root Directory** empty (the repo root). `vercel.json` already sets the install, build and output settings, so the framework preset can stay on *Other*.
+2. Under **Settings → Environment Variables** add `MONGO_URI`, `JWT_SECRET`, `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD` (and `REDIS_TLS=true` if your Redis needs it) and `ADMIN_EMAILS`. `NODE_ENV` is `production` on Vercel automatically.
+3. Deploy, then open `https://<your-project>.vercel.app/api/health`. It should answer `{ "ok": true, "ip": "<your public IP>" }`.
+4. Register, log in and try the app.
 
-Notes:
-- The backend sends `Cache-Control: no-store`, and `vercel.json` switches rewrite caching off, because newer Vercel projects may cache responses from external rewrites.
-- Preview deployments get their own URLs. Add them to `FRONTEND_URL` (comma-separated) if login should work there.
-- On a free tier the backend can fall asleep. The first request after a quiet period may be slow or fail; an uptime pinger on `/api/health` keeps it awake.
-- People can still call the backend's own URL directly. The per-account login limit covers that case.
+**Uploading songs.** Vercel Functions reject request bodies larger than 4.5 MB and songs can be 10 MB, so upload from your own machine: run the backend locally (`npm run dev` in `Backend`) with the same `MONGO_URI`, `IMAGEKIT_PRIVATE_KEY` and `ADMIN_EMAILS`, and post to `http://localhost:3000/api/songs` as described in [Adding songs](#adding-songs). The songs show up on the deployed site because both use the same database.
+
+**Good to know**
+- Rate-limit counters live in Redis in production. Every request can reach a different instance, so counters in memory would each start from zero.
+- API responses are sent with `Cache-Control: no-store`, and a function may run for up to 30 seconds.
+- The first request after a quiet period is a little slower while a new instance starts.
 
 ## Troubleshooting
 
@@ -213,9 +220,10 @@ Notes:
 | Upload says `401` | Log in first (Postman or curl need the cookie) |
 | Upload says `422` | The MP3 has no ID3 title or embedded cover |
 | `429 Too many …` | Wait about 15 minutes, or restart the backend in development |
-| Everyone gets `429` at the same time | The server sees Vercel's IP for every visitor. Set `TRUST_PROXY=2` and check `/api/health` |
-| `403 Origin not allowed` on Vercel | Add your Vercel URL to `FRONTEND_URL` on the backend and redeploy it |
-| First request after a quiet period is slow or fails | A sleeping free-tier backend is waking up. Retry, or ping `/api/health` every few minutes |
+| `500 Server is not configured` on Vercel | `MONGO_URI` or `JWT_SECRET` is missing in the project's environment variables. Add it and redeploy |
+| `503 Database unavailable` on Vercel | In MongoDB Atlas, Network Access must allow connections from anywhere (`0.0.0.0/0`) |
+| Login works but logout or other calls fail on Vercel | Redis isn't reachable from outside, or needs `REDIS_TLS=true` |
+| Upload returns `413` on Vercel | Vercel rejects bodies over 4.5 MB. Upload from a locally running backend |
 | Songs return `401` in development | `VITE_API_URL` must point at the same backend you logged in to (or be unset) |
 | Upload times out | Raise `IMAGEKIT_UPLOAD_TIMEOUT` and check your connection to ImageKit |
 
