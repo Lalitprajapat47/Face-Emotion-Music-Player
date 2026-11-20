@@ -18,7 +18,7 @@ const app = require('./src/app')
 const connectToDb = require('./src/config/database')
 
 
-connectToDb()
+connectToDb().catch((err) => console.log(err))
 
 const PORT = process.env.PORT || 3000
 
