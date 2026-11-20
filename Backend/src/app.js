@@ -39,18 +39,33 @@ const allowedOrigins = [
 app.use(express.static('public'));
 app.use(express.json({ limit: '10kb' }))   // auth bodies are tiny; uploads use multipart
 app.use(cookieParser())
-app.use(cors({
-    origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-            return;
-        }
+// A request is allowed when it has no Origin header (curl, Postman), comes from
+// a listed origin, or is SAME-ORIGIN: the Origin's host is the host this server
+// was addressed as. That last rule is what lets the one-domain deploy (Vercel)
+// work without listing every preview URL, and it can't be abused by another
+// site, because a browser always sends the real Origin of the page.
+function isAllowedOrigin(origin, req) {
+    if (!origin || allowedOrigins.includes(origin)) return true
+    try {
+        return new URL(origin).host === req.headers.host
+    } catch {
+        return false
+    }
+}
 
-        callback(new Error(`CORS blocked for origin: ${origin}`));
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+app.use(cors((req, callback) => {
+    const origin = req.header('Origin')
+
+    if (isAllowedOrigin(origin, req)) {
+        return callback(null, {
+            origin: true,
+            credentials: true,
+            methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+            allowedHeaders: ['Content-Type', 'Authorization'],
+        })
+    }
+
+    callback(new Error(`CORS blocked for origin: ${origin}`))
 }));
 
 // API answers are per-user, so nothing between the server and the browser
