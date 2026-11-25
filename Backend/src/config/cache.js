@@ -4,9 +4,9 @@ const redis = new Redis({
     host: process.env.REDIS_HOST,
     port: process.env.REDIS_PORT,
     password: process.env.REDIS_PASSWORD,
-    // Fail a command after a few tries instead of the default 20: on a
-    // serverless function a hung request is worse than a quick error.
-    maxRetriesPerRequest: 3,
+    // Keep ioredis's default retry behaviour (20). A Redis connection that
+    // sat idle gets dropped by the provider; the next command has to wait
+    // for the reconnect, and a low limit makes that first request fail.
     connectTimeout: 10000,
     // Managed Redis such as Upstash needs TLS: set REDIS_TLS=true
     ...(process.env.REDIS_TLS === "true" ? { tls: {} } : {}),
