@@ -1,9 +1,6 @@
 import axios from "axios";
 
 const api = axios.create({
-    // Same rule as auth.api.js: relative URLs by default (Vite proxies /api to
-    // the backend in development; in the Docker deploy the API is on the same
-    // origin). Set VITE_API_URL only if you want to point at another backend.
     baseURL:"",
     withCredentials: true
 })
