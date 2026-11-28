@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { detect, init } from "../utils/utils";
+import { recoverFromInterruptedPlay } from "../utils/recoverPlay";
 
 // How far the nose has to travel (as a fraction of face width) before a head
 // turn counts as "skip"...
@@ -153,7 +154,9 @@ export function useFaceSensor({ headActive = false, onHeadTurn = () => {} } = {}
     let mountedFlag = true;
 
     (async () => {
-      const result = await init({ landmarkerRef, videoRef, streamRef });
+      const first = await init({ landmarkerRef, videoRef, streamRef });
+      // dev-only StrictMode race: see utils/recoverPlay.js
+      const result = await recoverFromInterruptedPlay(first, videoRef.current);
       if (mountedFlag) setStatus(result);
     })();
 
